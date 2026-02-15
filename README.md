@@ -1,42 +1,96 @@
-# FixIt Hub - AI-Powered Civic Intelligence Platform
+# 🌍 FixIt Hub  
+## AI-Powered Civic Intelligence Platform
 
-FixIt Hub is a cloud-native platform to collect, translate, classify, and prioritize civic infrastructure issues across India. It combines multilingual AI processing, transparent resolution tracking, and executive reporting to help municipalities respond faster and plan better.
+FixIt Hub is a web-based civic intelligence platform that enables citizens to report public infrastructure issues and helps government authorities respond with transparency, accountability, and data-driven prioritization.
 
-## Project Status
+The system transforms scattered civic complaints into structured analytics and predictive risk indicators using AI.
 
-This repository currently contains the idea, requirements, and design. Implementation has not started yet.
+---
 
-## Key Features
+## 🎯 Problem
 
-- Multilingual issue submission (22+ Indian languages)
-- AI translation and automatic classification
-- Predictive risk scoring for emerging hotspots
-- Proof-based resolution and controlled reopen workflow
-- Executive summaries and analytics dashboards
+Civic issue reporting in India is:
 
-## Documentation
+- Fragmented across platforms  
+- Reactive instead of proactive  
+- Limited by language barriers  
+- Lacking structured analytics  
+- Weak in accountability tracking  
 
-- Requirements: requirements.md
-- Design: design.md
+Municipalities often respond only after issues escalate, without early warning systems or risk-based prioritization.
 
-## Planned Tech Stack
+---
 
-- Frontend: React + Vite
-- Backend: FastAPI (Python)
-- Database: PostgreSQL (AWS RDS)
-- Storage: AWS S3
-- AI: Amazon Bedrock or external AI APIs
+## 💡 Solution
 
-## Repository Structure
+FixIt Hub centralizes civic issue reporting and enhances it with AI-driven intelligence.
 
-- requirements.md - Full requirements specification
-- design.md - Architecture and design details
-- README.md - Project overview
+The platform:
 
-## Contributing
+- Accepts multilingual issue submissions  
+- Automatically translates and classifies issues  
+- Tracks resolution with proof-based verification  
+- Allows controlled citizen reopen (max 2 times, 36-hour cooldown)  
+- Calculates ward-level predictive risk scores  
+- Generates AI-powered weekly executive summaries  
 
-Contributions are welcome. Please read CONTRIBUTING.md before opening issues or pull requests.
+This enables proactive governance instead of reactive complaint handling.
 
-## License
+---
 
-MIT License. See LICENSE for details.
+## 🚀 MVP Features (Web-Only)
+
+### 👤 User Roles
+- Citizen
+- Government Officer
+- Admin
+
+### 📝 Issue Reporting
+- Title and description
+- Image upload
+- GPS-based location tagging
+- Multilingual submission support
+- AI translation and classification
+
+### 🔄 Resolution Workflow
+- Officer marks issue as resolved with proof photo
+- Resolution notes required
+- Transparent resolution history
+- Citizen reopen logic (max 2 attempts + cooldown)
+
+### 📊 Intelligence & Analytics
+- Ward-level risk score calculation
+- Weekly statistics aggregation
+- AI-generated executive summary (200–300 words)
+- Dashboard displaying:
+  - Total Issues
+  - Fixed Issues
+  - Pending Issues
+
+---
+
+## 🧠 AI Capabilities
+
+- Language detection and translation
+- Automatic issue categorization with confidence score
+- Risk hotspot identification
+- Executive summary generation for decision-makers
+
+AI integration is handled via Amazon Bedrock or external AI APIs.
+
+---
+
+## 🏗️ Technology Stack (MVP)
+
+- **Frontend:** React + Vite  
+- **Backend:** FastAPI (Python)  
+- **Database:** PostgreSQL  
+- **Storage:** AWS S3  
+- **AI Integration:** Amazon Bedrock / External AI API  
+
+The architecture is cloud-ready and designed for scalability.
+
+---
+
+## 📂 Repository Structure
+
