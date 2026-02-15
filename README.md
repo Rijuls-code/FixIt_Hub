@@ -101,7 +101,6 @@ FixIt_Hub/
 ├── design.md → Architecture and technical design
 ├── README.md → Project overview
 └── (implementation folders to be added in development phase)
----
 
 ```
 
@@ -127,6 +126,7 @@ MVP implementation in progress.
 ## 📄 License
 
 MIT License
+
 
 
 
