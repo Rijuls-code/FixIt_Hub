@@ -97,6 +97,7 @@ The architecture is cloud-ready and designed for scalability.
 FixIt Hub is developed by a multidisciplinary team focused on scalable backend systems, AI integration, and civic technology innovation.
 
 ### Members :
+
 - Repo Owner : [**Rijul Singh**](https://github.com//Rijuls-code)
 - Backend : [Shreyas Patil](https://github.com//Shreyas-patil07)
 - Member : [Vedant Sawant](https://github.com//vedantsawant2803-cloud)
@@ -114,3 +115,4 @@ MVP implementation in progress.
 ## 📄 License
 
 MIT License
+
