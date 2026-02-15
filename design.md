@@ -1,956 +1,2429 @@
-# Design Document: Citizen Issue Reporter
+# FixIt Hub – AI-Powered Civic Intelligence Platform
 
-## Overview
+## Design Document v1.0
 
-The Citizen Issue Reporter is a full-stack web and mobile application that connects citizens with government authorities through a social media-inspired interface. The system architecture follows a modern microservices approach with clear separation between frontend, backend API, AI services, and data storage layers.
+## Table of Contents
 
-### Key Design Principles
+- [1. System Overview](#1-system-overview)
+- [2. Core Objectives](#2-core-objectives)
+- [3. High-Level Architecture](#3-high-level-architecture)
+- [4. Functional Modules](#4-functional-modules)
+- [5. Complete Database Design](#5-complete-database-design)
+- [6. API Design](#6-api-design)
+- [7. Security & Non-Functional Requirements](#7-security--non-functional-requirements)
+- [8. Deployment Design](#8-deployment-design)
+- [9. Future Enhancements](#9-future-enhancements)
+- [10. Technical Stack Summary](#10-technical-stack-summary)
+- [11. Development Roadmap](#11-development-roadmap)
+- [12. Success Metrics](#12-success-metrics)
+- [13. Risk Mitigation](#13-risk-mitigation)
+- [14. Compliance & Standards](#14-compliance--standards)
+- [15. Conclusion](#15-conclusion)
+- [Appendix A: Glossary](#appendix-a-glossary)
+- [Appendix B: API Quick Reference](#appendix-b-api-quick-reference)
+- [Appendix C: Database ER Diagram](#appendix-c-database-er-diagram)
+- [Appendix D: Sample AI Prompts](#appendix-d-sample-ai-prompts)
+- [Document Information](#document-information)
 
-1. **Mobile-First**: Responsive design optimized for mobile devices with progressive web app capabilities
-2. **Scalability**: Microservices architecture to handle growing user base and data volume
-3. **Real-Time**: WebSocket connections for live updates and notifications
-4. **AI-Driven**: Machine learning integration for intelligent categorization and insights
-5. **Security**: End-to-end encryption, role-based access control, and secure authentication
-6. **Accessibility**: Multi-language support and inclusive design patterns
+---
 
-### Technology Stack
+## 1. System Overview
 
-**Frontend:**
-- React Native (mobile apps for iOS/Android)
-- React.js (web application)
-- Redux for state management
-- Socket.io client for real-time updates
-- React Native Maps for geolocation visualization
+### 1.1 Introduction
 
-**Backend:**
-- Node.js with Express.js (API Gateway)
-- Python with FastAPI (AI/ML services)
-- PostgreSQL (primary database)
-- Redis (caching and session management)
-- MongoDB (analytics and logs)
+**FixIt Hub** is a cloud-native, AI-powered civic intelligence platform designed specifically for India's diverse urban and semi-urban landscapes. The system enables citizens to report critical infrastructure issues including potholes, garbage overflow, water leakage, broken streetlights, and road damage through an intuitive web interface.
 
-**AI/ML:**
-- TensorFlow/PyTorch for image analysis
-- Natural Language Processing for text categorization
-- Pre-trained models for content moderation
+### 1.2 Problem Statement
 
-**Infrastructure:**
-- AWS S3 or Google Cloud Storage for media files
-- AWS Lambda or Google Cloud Functions for serverless processing
-- Docker and Kubernetes for containerization
-- CDN for media delivery
-- Firebase Cloud Messaging for push notifications
+Traditional civic complaint systems suffer from:
 
-## Architecture
+- Reactive rather than proactive governance
+- Language barriers in multilingual regions
+- Lack of transparency in resolution tracking
+- No predictive analytics for infrastructure stress zones
+- Poor citizen engagement due to lack of feedback loops
 
-### High-Level Architecture
+### 1.3 Solution Approach
+
+The platform transforms raw citizen complaints into structured, actionable intelligence through:
+
+- **AI-powered multilingual normalization** supporting 22+ Indian languages
+- **Automated classification** of issue types and severity
+- **Predictive risk scoring** to identify emerging infrastructure stress zones
+- **Weekly AI-generated executive reports** for decision-makers
+- **Transparent resolution tracking** with citizen reopen capabilities
+- **Cloud-native architecture** ensuring scalability and reliability
+
+### 1.4 Key Differentiators
+
+> - Multilingual AI processing for inclusive participation
+> - Controlled reopen mechanism preventing spam while ensuring accountability
+> - Risk-based prioritization using statistical modeling
+> - Executive-ready AI summaries for rapid decision-making
+> - Full audit trail of resolution attempts
+
+---
+
+## 2. Core Objectives
+
+1. **Centralized Civic Issue Reporting**: Single platform for all infrastructure complaints
+2. **Transparent Resolution Tracking**: Real-time status updates with proof of resolution
+3. **AI-Based Intelligence**: Multilingual normalization, classification, and insights
+4. **Predictive Analytics**: Risk scoring to identify emerging problem zones
+5. **Executive Reporting**: Weekly AI-generated summaries for governance
+6. **Scalable Cloud Architecture**: AWS-based infrastructure for national-scale deployment
+
+---
+
+## 3. High-Level Architecture
+
+### 3.1 Architecture Overview
+
+The system follows a modern three-tier cloud-native architecture deployed on AWS:
 
 ```mermaid
-graph TB
-    subgraph "Client Layer"
-        Mobile[Mobile Apps<br/>iOS/Android]
-        Web[Web Application]
-    end
-    
-    subgraph "API Gateway Layer"
-        Gateway[API Gateway<br/>Node.js/Express]
-        WS[WebSocket Server]
-    end
-    
-    subgraph "Service Layer"
-        Auth[Authentication<br/>Service]
-        Issue[Issue Management<br/>Service]
-        Resolution[Resolution<br/>Service]
-        AI[AI Analysis<br/>Service]
-        Analytics[Analytics<br/>Service]
-        Notification[Notification<br/>Service]
-    end
-    
-    subgraph "Data Layer"
-        PG[(PostgreSQL<br/>Primary DB)]
-        Mongo[(MongoDB<br/>Analytics)]
-        Redis[(Redis<br/>Cache)]
-        S3[Cloud Storage<br/>Media Files]
-    end
-    
-    Mobile --> Gateway
-    Web --> Gateway
-    Mobile --> WS
-    Web --> WS
-    
-    Gateway --> Auth
-    Gateway --> Issue
-    Gateway --> Resolution
-    Gateway --> Analytics
-    
-    Issue --> AI
-    Issue --> Notification
-    Resolution --> Notification
-    
-    Auth --> PG
-    Auth --> Redis
-    Issue --> PG
-    Issue --> S3
-    Issue --> AI
-    Resolution --> PG
-    Resolution --> S3
-    Analytics --> Mongo
-    Analytics --> PG
-    Notification --> Redis
+flowchart LR
+  UI[React + Vite] --> Edge[S3 + CloudFront]
+  Edge --> Gateway[API Gateway / ALB]
+  Gateway --> API[FastAPI Backend]
+  API --> DB[(AWS RDS PostgreSQL)]
+  API --> Storage[(AWS S3 Buckets)]
+  API --> AI[Amazon Bedrock or External AI]
+  API --> Logs[CloudWatch Logs + Metrics]
 ```
 
-### Data Flow
+### 3.2 Component Description
 
-**Issue Submission Flow:**
-1. Citizen uploads issue with media through mobile/web client
-2. API Gateway authenticates request and validates input
-3. Media files uploaded to cloud storage, URLs returned
-4. Issue data stored in PostgreSQL with media URLs
-5. AI Analysis Service triggered asynchronously
-6. AI categorizes issue and extracts metadata
-7. Issue updated with AI-generated categories
-8. Real-time notification sent via WebSocket to relevant users
-9. Analytics service updates metrics
+#### 3.2.1 Frontend Layer
 
-**Resolution Posting Flow:**
-1. Officer posts resolution linked to an issue
-2. API Gateway validates Officer permissions
-3. Resolution media uploaded to cloud storage
-4. Resolution data stored in PostgreSQL
-5. Issue status updated to "resolved"
-6. Notification sent to issue reporter and followers
-7. Analytics updated with resolution metrics
+- **Technology**: React 18+ with Vite build tool
+- **Hosting**: AWS S3 (static hosting) + CloudFront (CDN)
+- **Features**:
+  - Responsive design for mobile and desktop
+  - Interactive map integration (Leaflet/Google Maps)
+  - Real-time status updates
+  - Multilingual UI support
 
-## Components and Interfaces
+#### 3.2.2 API Gateway
 
-### 1. Authentication Service
+- **Options**: AWS Application Load Balancer (ALB) or AWS API Gateway
+- **Responsibilities**:
+  - Request routing and load balancing
+  - SSL/TLS termination
+  - Rate limiting and throttling
+  - CORS handling
+  - Request/response transformation
 
-**Responsibilities:**
-- User registration and login
-- JWT token generation and validation
-- Role-based access control
-- Officer verification workflow
-- Session management
+#### 3.2.3 Backend Application Layer
 
-**API Endpoints:**
+- **Technology**: FastAPI (Python 3.11+)
+- **Hosting Options**:
+  - **AWS EC2**: Full control, custom configurations
+  - **AWS App Runner**: Simplified container deployment
+- **Key Libraries**:
+  - SQLAlchemy (ORM)
+  - Pydantic (validation)
+  - boto3 (AWS SDK)
+  - Pillow (image processing)
+  - httpx (async HTTP client)
 
-```typescript
-POST /api/auth/register
-Request: {
-  email: string,
-  password: string,
-  phone: string,
-  role: "citizen" | "officer",
-  name: string,
-  verificationCredentials?: object // for officers
-}
-Response: {
-  userId: string,
-  message: string,
-  requiresVerification: boolean
-}
+#### 3.2.4 Database Layer
 
-POST /api/auth/login
-Request: {
-  email: string,
-  password: string
-}
-Response: {
-  token: string,
-  refreshToken: string,
-  user: UserProfile
-}
+- **Service**: AWS RDS PostgreSQL 15+
+- **Configuration**:
+  - Multi-AZ deployment for high availability
+  - Automated backups with 7-day retention
+  - Read replicas for analytics queries
+  - Connection pooling via PgBouncer
 
-POST /api/auth/refresh
-Request: {
-  refreshToken: string
-}
-Response: {
-  token: string
-}
+#### 3.2.5 Object Storage
 
-GET /api/auth/verify-officer/:verificationId
-Response: {
-  status: "pending" | "approved" | "rejected"
-}
+- **Service**: AWS S3
+- **Buckets**:
+  - `fixit-hub-issues`: Issue images uploaded by citizens
+  - `fixit-hub-resolutions`: Resolution proof photos
+- **Features**:
+  - Lifecycle policies for cost optimization
+  - Server-side encryption (SSE-S3)
+  - Presigned URLs for secure uploads
+  - CloudFront integration for fast delivery
+
+#### 3.2.6 AI Processing Layer
+
+- **Primary Option**: Amazon Bedrock (Claude/Titan models)
+- **Fallback Option**: External API (OpenAI/Anthropic)
+- **Capabilities**:
+  - Multilingual translation (22+ Indian languages → English)
+  - Issue classification (pothole, garbage, water, electrical, road)
+  - Executive summary generation
+  - Sentiment analysis (optional)
+
+#### 3.2.7 Monitoring & Logging
+
+- **Service**: AWS CloudWatch
+- **Metrics**:
+  - API response times
+  - Error rates
+  - Database connection pool usage
+  - S3 upload success rates
+  - AI processing latency
+- **Alarms**: Automated alerts for critical failures
+- **Logs**: Centralized application and access logs
+
+### 3.3 Data Flow
+
+#### 3.3.1 Issue Submission Flow
+
+1. Citizen submits issue via React frontend
+2. Frontend uploads image to S3 (presigned URL)
+3. Frontend sends issue data to FastAPI backend
+4. Backend validates and stores in PostgreSQL
+5. Backend triggers async AI processing
+6. AI translates and classifies issue
+7. Backend updates issue record with AI metadata
+8. Frontend receives confirmation and issue ID
+
+#### 3.3.2 Resolution Flow
+
+1. Officer marks issue as resolved with proof photo
+2. Backend uploads proof to S3
+3. Backend updates issue status and resolution timestamp
+4. Citizen receives notification
+5. Citizen can reopen (if within limits)
+
+#### 3.3.3 Weekly Report Generation Flow
+
+1. Scheduled job (cron/EventBridge) triggers report generation
+2. Backend aggregates weekly statistics from PostgreSQL
+3. Backend computes risk scores for all wards
+4. Backend sends structured data to AI for executive summary
+5. AI generates natural language report
+6. Backend stores report in database
+7. Dashboard displays latest report
+
+---
+
+## 4. Functional Modules
+
+### 4.1 User Management Module
+
+#### 4.1.1 User Roles
+
+- **Citizen**: Can report issues, view status, reopen resolved issues
+- **Government Officer**: Can resolve issues, upload proof, view analytics
+- **Admin**: Full system access, user management, report generation
+
+#### 4.1.2 Registration & Authentication
+
+- **Citizen Registration**:
+  - Email/phone number
+  - Password (bcrypt hashed)
+  - Name and location
+  - Optional: Aadhaar verification for verified badge
+
+- **Officer Registration**:
+  - Government email domain verification
+  - Department and ward assignment
+  - Admin approval required
+  - Verified badge upon approval
+
+#### 4.1.3 Authentication Mechanism
+
+- **JWT-based authentication**
+- Access token (15 min expiry)
+- Refresh token (7 day expiry)
+- Secure HTTP-only cookies
+- Role-based access control (RBAC)
+
+#### 4.1.4 Database Schema (users table)
+
+```sql
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    phone VARCHAR(15) UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    full_name VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL CHECK (role IN ('citizen', 'officer', 'admin')),
+    is_verified BOOLEAN DEFAULT FALSE,
+    department VARCHAR(100),
+    ward_assigned VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_role ON users(role);
 ```
 
-### 2. Issue Management Service
+### 4.2 Issue Reporting Module
 
-**Responsibilities:**
-- Create, read, update, delete issues
-- Media upload handling
-- Geolocation processing
-- Issue filtering and search
-- Priority voting
+#### 4.2.1 Issue Submission
 
-**API Endpoints:**
+Citizens can submit issues with:
 
-```typescript
-POST /api/issues
-Request: {
-  description: string,
-  location: {
-    latitude: number,
-    longitude: number,
-    address?: string
-  },
-  mediaFiles: File[],
-  language: string
-}
-Response: {
-  issueId: string,
-  status: "pending",
-  createdAt: timestamp,
-  mediaUrls: string[]
-}
+- **Title**: Brief description (max 200 chars)
+- **Description**: Detailed explanation (multilingual support)
+- **Category**: Auto-classified by AI or manual selection
+- **Location**: GPS coordinates or map pin
+- **Image**: Photo evidence (max 5MB, JPEG/PNG)
+- **Language**: Original language of submission
 
-GET /api/issues
-Query Parameters: {
-  location?: string,
-  category?: string[],
-  status?: string[],
-  timeRange?: string,
-  page: number,
-  limit: number
-}
-Response: {
-  issues: Issue[],
-  totalCount: number,
-  page: number
-}
+#### 4.2.2 Location Tagging
 
-GET /api/issues/:issueId
-Response: Issue
+- Interactive map interface (Leaflet.js)
+- GPS auto-detection
+- Manual pin placement
+- Address reverse geocoding
+- Ward/zone auto-assignment based on coordinates
 
-POST /api/issues/:issueId/vote
-Response: {
-  voteCount: number
-}
+#### 4.2.3 Status Management
 
-PATCH /api/issues/:issueId/status
-Request: {
-  status: "pending" | "in-progress" | "resolved"
-}
-Response: Issue
+Issue lifecycle states:
+
+- **OPEN**: Newly reported, awaiting action
+- **IN_PROGRESS**: Officer assigned, work started
+- **RESOLVED**: Marked complete with proof
+- **REOPENED**: Citizen disputed resolution
+- **CLOSED**: Final closure after reopen limit
+
+#### 4.2.4 Database Schema (issues table)
+
+```sql
+CREATE TABLE issues (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title VARCHAR(200) NOT NULL,
+    description TEXT NOT NULL,
+    description_translated TEXT,
+    category VARCHAR(50),
+    category_confidence FLOAT,
+    status VARCHAR(20) DEFAULT 'OPEN' CHECK (status IN ('OPEN', 'IN_PROGRESS', 'RESOLVED', 'REOPENED', 'CLOSED')),
+    
+    -- Location data
+    latitude DECIMAL(10, 8) NOT NULL,
+    longitude DECIMAL(11, 8) NOT NULL,
+    address TEXT,
+    ward VARCHAR(100),
+    city VARCHAR(100),
+    
+    -- Media
+    image_url TEXT,
+    
+    -- User tracking
+    reported_by UUID REFERENCES users(id),
+    assigned_to UUID REFERENCES users(id),
+    
+    -- Resolution tracking
+    resolved_at TIMESTAMP,
+    resolution_proof_url TEXT,
+    resolution_notes TEXT,
+    
+    -- Reopen logic
+    reopen_count INTEGER DEFAULT 0,
+    last_reopened_at TIMESTAMP,
+    reopen_reason TEXT,
+    
+    -- AI metadata
+    original_language VARCHAR(10),
+    ai_processed BOOLEAN DEFAULT FALSE,
+    
+    -- Timestamps
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_issues_status ON issues(status);
+CREATE INDEX idx_issues_category ON issues(category);
+CREATE INDEX idx_issues_ward ON issues(ward);
+CREATE INDEX idx_issues_created_at ON issues(created_at);
+CREATE INDEX idx_issues_location ON issues(latitude, longitude);
 ```
 
-### 3. AI Analysis Service
+### 4.3 Resolution & Reopen Control Module
 
-**Responsibilities:**
-- Image and video content analysis
-- Text description NLP processing
-- Automatic categorization
-- Urgency detection
-- Content moderation
+#### 4.3.1 Resolution Process
 
-**Internal API:**
+**Officer Actions**:
 
+1. View assigned issues in dashboard
+2. Update status to IN_PROGRESS
+3. Complete resolution work
+4. Upload proof photo (before/after comparison)
+5. Add resolution notes
+6. Mark as RESOLVED
+
+**Backend Validation**:
+
+- Proof photo required (enforced)
+- Resolution notes minimum 20 characters
+- Timestamp recorded
+- Citizen notification triggered
+
+#### 4.3.2 Reopen Logic
+
+**Citizen Reopen Rights**:
+
+- Can reopen RESOLVED issues
+- Maximum 2 reopens per issue
+- 36-hour cooldown between consecutive reopens
+- Must provide reopen reason (min 50 chars)
+
+**Business Rules**:
 ```python
-def analyze_issue(issue_data: IssueData) -> AnalysisResult:
-    """
-    Analyzes issue content and returns categorization
+def can_reopen(issue):
+    if issue.reopen_count >= 2:
+        return False, "Maximum reopen limit reached"
     
-    Args:
-        issue_data: Contains description, media_urls, location
+    if issue.last_reopened_at:
+        hours_since_reopen = (now() - issue.last_reopened_at).total_seconds() / 3600
+        if hours_since_reopen < 36:
+            return False, f"Cooldown active. Wait {36 - hours_since_reopen:.1f} hours"
     
-    Returns:
-        AnalysisResult with categories, urgency_score, keywords
-    """
-    pass
-
-def moderate_content(content: Content) -> ModerationResult:
-    """
-    Checks content for policy violations
+    if issue.status != 'RESOLVED':
+        return False, "Only resolved issues can be reopened"
     
-    Returns:
-        ModerationResult with is_appropriate flag and reasons
-    """
-    pass
+    return True, "Reopen allowed"
 ```
 
-**Categories:**
-- Infrastructure (roads, bridges, buildings)
-- Sanitation (waste management, cleanliness)
-- Safety (street lights, security concerns)
-- Utilities (water, electricity, gas)
-- Environment (pollution, tree maintenance)
-- Traffic (congestion, signals, parking)
-- Health (public health hazards)
+#### 4.3.3 Transparency Features
+
+- Full resolution history visible to citizen
+- All previous resolution attempts displayed
+- Proof photos accessible
+- Officer notes visible
+- Reopen reasons logged
+
+#### 4.3.4 Database Updates
+
+```sql
+-- Add resolution history tracking
+CREATE TABLE resolution_history (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    issue_id UUID REFERENCES issues(id),
+    resolved_by UUID REFERENCES users(id),
+    resolved_at TIMESTAMP NOT NULL,
+    proof_url TEXT NOT NULL,
+    notes TEXT,
+    reopened BOOLEAN DEFAULT FALSE,
+    reopen_reason TEXT,
+    reopened_at TIMESTAMP
+);
+
+CREATE INDEX idx_resolution_history_issue ON resolution_history(issue_id);
+```
+
+### 4.4 AI Processing Module
+
+#### 4.4.1 Multilingual Translation
+
+**Supported Languages**: Hindi, Bengali, Telugu, Marathi, Tamil, Gujarati, Urdu, Kannada, Odia, Malayalam, Punjabi, Assamese, Maithili, Sanskrit, Konkani, Nepali, Sindhi, Dogri, Kashmiri, Manipuri, Bodo, Santali, English
+
+**Translation Flow**:
+
+1. Detect source language from user input
+2. Send to AI model with prompt:
+```
+Translate the following civic complaint from {source_lang} to English.
+Preserve technical terms and location names.
+
+Original: {description}
+```
+
+3. Store translated text in `description_translated` field
+4. Fallback: If AI fails, store original text
+
+#### 4.4.2 Automatic Classification
+
+**Categories**:
+
+- Pothole
+- Garbage/Waste Management
+- Water Leakage/Supply
+- Electrical/Streetlight
+- Road Damage
+- Drainage/Sewage
 - Other
 
-### 4. Resolution Service
-
-**Responsibilities:**
-- Create and manage resolutions
-- Link resolutions to issues
-- Update issue status
-- Track resolution metrics
-
-**API Endpoints:**
-
-```typescript
-POST /api/resolutions
-Request: {
-  issueId: string,
-  description: string,
-  mediaFiles: File[],
-  language: string
-}
-Response: {
-  resolutionId: string,
-  issueId: string,
-  createdAt: timestamp,
-  mediaUrls: string[]
-}
-
-GET /api/resolutions/:resolutionId
-Response: Resolution
-
-GET /api/issues/:issueId/resolutions
-Response: Resolution[]
-```
-
-### 5. Analytics Service
-
-**Responsibilities:**
-- Aggregate issue and resolution metrics
-- Generate dashboard data
-- Calculate resolution time statistics
-- Track trends over time
-
-**API Endpoints:**
-
-```typescript
-GET /api/analytics/overview
-Query Parameters: {
-  startDate?: date,
-  endDate?: date,
-  location?: string
-}
-Response: {
-  totalIssues: number,
-  resolvedIssues: number,
-  pendingIssues: number,
-  inProgressIssues: number,
-  averageResolutionTime: number, // in hours
-  issuesByCategory: CategoryCount[],
-  issuesByLocation: LocationCount[],
-  trendData: TrendPoint[]
-}
-
-GET /api/analytics/category/:category
-Response: {
-  totalIssues: number,
-  resolvedPercentage: number,
-  averageResolutionTime: number,
-  topLocations: LocationCount[]
+**Classification Prompt**:
+```json
+{
+  "task": "classify_civic_issue",
+  "description": "{translated_description}",
+  "title": "{title}",
+  "categories": ["pothole", "garbage", "water", "electrical", "road", "drainage", "other"],
+  "output_format": {
+    "category": "string",
+    "confidence": "float (0-1)"
+  }
 }
 ```
 
-### 6. Notification Service
+**Confidence Handling**:
 
-**Responsibilities:**
-- Send push notifications
-- Manage WebSocket connections
-- Email notifications
-- User notification preferences
+- Confidence > 0.8: Auto-assign category
+- Confidence 0.5-0.8: Suggest to officer for confirmation
+- Confidence < 0.5: Mark as "Other", require manual classification
 
-**WebSocket Events:**
+#### 4.4.3 Weekly Executive Summary Generation
 
-```typescript
-// Client subscribes to updates
-socket.emit('subscribe', { issueIds: string[] })
-
-// Server sends updates
-socket.on('issue_updated', (data: {
-  issueId: string,
-  status: string,
-  updatedAt: timestamp
-}))
-
-socket.on('resolution_posted', (data: {
-  issueId: string,
-  resolutionId: string,
-  officerName: string
-}))
-
-socket.on('new_issue', (data: {
-  issue: Issue
-}))
-```
-
-### 7. Media Storage Service
-
-**Responsibilities:**
-- Upload media to cloud storage
-- Generate thumbnails and optimized versions
-- Serve media through CDN
-- Manage storage quotas
-
-**Interface:**
-
-```typescript
-async function uploadMedia(
-  file: File,
-  userId: string,
-  type: "issue" | "resolution"
-): Promise<MediaUploadResult> {
-  // Validate file type and size
-  // Scan for malicious content
-  // Upload to cloud storage
-  // Generate thumbnail
-  // Return URLs
-}
-
-async function getMediaUrl(
-  mediaId: string,
-  size: "thumbnail" | "medium" | "full"
-): Promise<string> {
-  // Return CDN URL for requested size
+**Input Data Structure**:
+```json
+{
+  "week_start": "2026-02-09",
+  "week_end": "2026-02-15",
+  "total_issues": 1247,
+  "resolved_issues": 892,
+  "open_issues": 355,
+  "growth_rate": 12.5,
+  "avg_resolution_time_hours": 48.3,
+  "top_category": "pothole",
+  "top_ward": "Ward 23 - Koramangala",
+  "high_risk_zones": [
+    {"ward": "Ward 23", "risk_score": 87.5},
+    {"ward": "Ward 15", "risk_score": 76.2}
+  ],
+  "category_breakdown": {
+    "pothole": 456,
+    "garbage": 312,
+    "water": 189
+  }
 }
 ```
 
-## Data Models
+**AI Prompt**:
+```
+You are a civic intelligence analyst. Generate a concise executive summary 
+for government officials based on the following weekly civic issue data.
 
-### User Model
+Focus on:
+1. Key trends and changes
+2. Areas requiring immediate attention
+3. Performance metrics
+4. Actionable recommendations
 
-```typescript
-interface User {
-  userId: string;
-  email: string;
-  passwordHash: string;
-  phone: string;
-  name: string;
-  role: "citizen" | "officer";
-  profilePicture?: string;
-  preferredLanguage: string;
-  location?: {
-    city: string;
-    state: string;
-  };
-  verificationStatus?: "pending" | "approved" | "rejected"; // for officers
-  createdAt: timestamp;
-  updatedAt: timestamp;
+Data: {json_data}
+
+Generate a 200-300 word executive summary in professional tone.
+```
+
+#### 4.4.4 Fallback Handling
+
+**AI Service Failure Strategy**:
+
+1. Retry with exponential backoff (3 attempts)
+2. If translation fails: Store original text, flag for manual review
+3. If classification fails: Assign "Other" category
+4. If summary fails: Generate template-based summary
+5. Log all failures to CloudWatch for monitoring
+
+**Error Logging**:
+```python
+logger.error(
+    "AI processing failed",
+    extra={
+        "issue_id": issue_id,
+        "operation": "translation",
+        "error": str(e),
+        "retry_count": retry_count
+    }
+)
+```
+
+### 4.5 Analytics & Risk Scoring Module
+
+#### 4.5.1 Risk Score Formula
+
+**Mathematical Model**:
+```
+Risk Score = (w1 × R) + (w2 × T) + (w3 × G) + (w4 × S)
+
+Where:
+R = Repeated Reports Score (0-100)
+T = Time Unresolved Score (0-100)
+G = Growth Rate Score (0-100)
+S = Severity Score (0-100)
+
+Weights (tunable):
+w1 = 0.35 (repeated reports)
+w2 = 0.30 (time factor)
+w3 = 0.25 (growth rate)
+w4 = 0.10 (severity)
+```
+
+#### 4.5.2 Component Calculations
+
+**Repeated Reports Score (R)**:
+```python
+def calculate_repeated_reports_score(ward, radius_km=1.0):
+    # Count issues within radius in last 30 days
+    cluster_count = count_issues_in_radius(ward, radius_km, days=30)
+    
+    # Normalize to 0-100
+    max_threshold = 50  # 50+ issues = max score
+    return min(100, (cluster_count / max_threshold) * 100)
+```
+
+**Time Unresolved Score (T)**:
+```python
+def calculate_time_score(ward):
+    open_issues = get_open_issues(ward)
+    
+    if not open_issues:
+        return 0
+    
+    avg_days_open = sum(
+        (now() - issue.created_at).days for issue in open_issues
+    ) / len(open_issues)
+    
+    # Normalize: 30+ days = max score
+    return min(100, (avg_days_open / 30) * 100)
+```
+
+**Growth Rate Score (G)**:
+```python
+def calculate_growth_score(ward):
+    current_week_count = count_issues(ward, weeks=1)
+    previous_week_count = count_issues(ward, weeks=2, offset=1)
+    
+    if previous_week_count == 0:
+        return 0
+    
+    growth_rate = ((current_week_count - previous_week_count) / previous_week_count) * 100
+    
+    # Normalize: 50%+ growth = max score
+    return min(100, max(0, growth_rate * 2))
+```
+
+**Severity Score (S)**:
+```python
+def calculate_severity_score(ward):
+    # Weight categories by severity
+    severity_weights = {
+        'water': 1.0,      # Critical
+        'electrical': 0.9,
+        'drainage': 0.8,
+        'pothole': 0.7,
+        'road': 0.6,
+        'garbage': 0.5,
+        'other': 0.3
+    }
+    
+    issues = get_open_issues(ward)
+    weighted_sum = sum(severity_weights.get(issue.category, 0.5) for issue in issues)
+    
+    # Normalize
+    return min(100, (weighted_sum / len(issues)) * 100) if issues else 0
+```
+
+#### 4.5.3 Risk Classification
+
+```python
+def classify_risk(risk_score):
+    if risk_score >= 75:
+        return "CRITICAL", "red"
+    elif risk_score >= 50:
+        return "HIGH", "orange"
+    elif risk_score >= 25:
+        return "MEDIUM", "yellow"
+    else:
+        return "LOW", "green"
+```
+
+#### 4.5.4 Weekly Aggregation Queries
+
+```sql
+-- Weekly statistics by ward
+SELECT 
+    ward,
+    COUNT(*) as total_issues,
+    COUNT(*) FILTER (WHERE status = 'RESOLVED') as resolved_count,
+    COUNT(*) FILTER (WHERE status IN ('OPEN', 'IN_PROGRESS')) as open_count,
+    AVG(EXTRACT(EPOCH FROM (resolved_at - created_at))/3600) as avg_resolution_hours,
+    COUNT(*) FILTER (WHERE reopen_count > 0) as reopened_count
+FROM issues
+WHERE created_at >= NOW() - INTERVAL '7 days'
+GROUP BY ward
+ORDER BY total_issues DESC;
+
+-- Category breakdown
+SELECT 
+    category,
+    COUNT(*) as count,
+    ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 2) as percentage
+FROM issues
+WHERE created_at >= NOW() - INTERVAL '7 days'
+GROUP BY category
+ORDER BY count DESC;
+
+-- Growth rate calculation
+WITH current_week AS (
+    SELECT COUNT(*) as count FROM issues 
+    WHERE created_at >= NOW() - INTERVAL '7 days'
+),
+previous_week AS (
+    SELECT COUNT(*) as count FROM issues 
+    WHERE created_at >= NOW() - INTERVAL '14 days' 
+    AND created_at < NOW() - INTERVAL '7 days'
+)
+SELECT 
+    current_week.count as current,
+    previous_week.count as previous,
+    ROUND(((current_week.count - previous_week.count) * 100.0 / NULLIF(previous_week.count, 0)), 2) as growth_rate
+FROM current_week, previous_week;
+```
+
+### 4.6 Weekly Report Generator
+
+#### 4.6.1 Report Generation Trigger
+
+**Scheduling Options**:
+
+- **AWS EventBridge**: Cron expression `cron(0 2 ? * MON *)` (Every Monday 2 AM IST)
+- **Alternative**: Celery Beat for self-hosted scheduling
+
+#### 4.6.2 Report Generation Process
+
+```python
+async def generate_weekly_report():
+    # 1. Aggregate statistics
+    stats = await aggregate_weekly_stats()
+    
+    # 2. Calculate risk scores for all wards
+    risk_scores = await calculate_all_ward_risks()
+    
+    # 3. Identify top performers and problem areas
+    top_ward = max(stats['wards'], key=lambda x: x['total_issues'])
+    top_category = max(stats['categories'], key=lambda x: x['count'])
+    
+    # 4. Prepare AI input
+    ai_input = {
+        "week_start": stats['week_start'],
+        "week_end": stats['week_end'],
+        "total_issues": stats['total_issues'],
+        "resolved_issues": stats['resolved_issues'],
+        "growth_rate": stats['growth_rate'],
+        "avg_resolution_time_hours": stats['avg_resolution_time'],
+        "top_category": top_category['name'],
+        "top_ward": top_ward['name'],
+        "high_risk_zones": [z for z in risk_scores if z['risk_score'] >= 50]
+    }
+    
+    # 5. Generate AI summary
+    executive_summary = await ai_service.generate_summary(ai_input)
+    
+    # 6. Store report
+    report = await db.weekly_reports.create({
+        "week_start": stats['week_start'],
+        "week_end": stats['week_end'],
+        "statistics": stats,
+        "risk_scores": risk_scores,
+        "executive_summary": executive_summary,
+        "generated_at": datetime.now()
+    })
+    
+    return report
+```
+
+#### 4.6.3 Database Schema (weekly_reports table)
+
+```sql
+CREATE TABLE weekly_reports (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    week_start DATE NOT NULL,
+    week_end DATE NOT NULL,
+    
+    -- Aggregate statistics
+    total_issues INTEGER NOT NULL,
+    resolved_issues INTEGER NOT NULL,
+    open_issues INTEGER NOT NULL,
+    reopened_issues INTEGER NOT NULL,
+    
+    -- Performance metrics
+    avg_resolution_time_hours DECIMAL(10, 2),
+    growth_rate DECIMAL(10, 2),
+    
+    -- Top performers
+    top_category VARCHAR(50),
+    top_ward VARCHAR(100),
+    
+    -- Risk analysis
+    high_risk_wards JSONB,
+    
+    -- AI-generated content
+    executive_summary TEXT NOT NULL,
+    
+    -- Full data dump
+    detailed_statistics JSONB,
+    
+    -- Metadata
+    generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    generated_by UUID REFERENCES users(id)
+);
+
+CREATE INDEX idx_weekly_reports_week ON weekly_reports(week_start, week_end);
+CREATE INDEX idx_weekly_reports_generated_at ON weekly_reports(generated_at);
+```
+
+#### 4.6.4 Report Access
+
+- **Public Dashboard**: Latest report visible to all users
+- **Historical Reports**: Accessible via `/reports` endpoint
+- **Export Options**: PDF, JSON, CSV formats
+- **Visualization**: Charts and graphs using Chart.js/D3.js
+
+---
+
+## 5. Complete Database Design
+
+### 5.1 Schema Overview
+
+The system uses PostgreSQL with the following tables:
+
+1. `users` - User authentication and profiles
+2. `issues` - Core issue tracking
+3. `resolution_history` - Resolution audit trail
+4. `weekly_reports` - Generated reports
+5. `audit_logs` - System activity logs (optional)
+
+### 5.2 Complete SQL Schema
+
+```sql
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- Users table
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    phone VARCHAR(15) UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    full_name VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL CHECK (role IN ('citizen', 'officer', 'admin')),
+    is_verified BOOLEAN DEFAULT FALSE,
+    department VARCHAR(100),
+    ward_assigned VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Issues table
+CREATE TABLE issues (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title VARCHAR(200) NOT NULL,
+    description TEXT NOT NULL,
+    description_translated TEXT,
+    category VARCHAR(50),
+    category_confidence FLOAT,
+    status VARCHAR(20) DEFAULT 'OPEN' CHECK (status IN ('OPEN', 'IN_PROGRESS', 'RESOLVED', 'REOPENED', 'CLOSED')),
+    
+    latitude DECIMAL(10, 8) NOT NULL,
+    longitude DECIMAL(11, 8) NOT NULL,
+    address TEXT,
+    ward VARCHAR(100),
+    city VARCHAR(100),
+    
+    image_url TEXT,
+    
+    reported_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    assigned_to UUID REFERENCES users(id) ON DELETE SET NULL,
+    
+    resolved_at TIMESTAMP,
+    resolution_proof_url TEXT,
+    resolution_notes TEXT,
+    
+    reopen_count INTEGER DEFAULT 0,
+    last_reopened_at TIMESTAMP,
+    reopen_reason TEXT,
+    
+    original_language VARCHAR(10),
+    ai_processed BOOLEAN DEFAULT FALSE,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Resolution history table
+CREATE TABLE resolution_history (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    issue_id UUID REFERENCES issues(id) ON DELETE CASCADE,
+    resolved_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    resolved_at TIMESTAMP NOT NULL,
+    proof_url TEXT NOT NULL,
+    notes TEXT,
+    reopened BOOLEAN DEFAULT FALSE,
+    reopen_reason TEXT,
+    reopened_at TIMESTAMP,
+    reopened_by UUID REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- Weekly reports table
+CREATE TABLE weekly_reports (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    week_start DATE NOT NULL,
+    week_end DATE NOT NULL,
+    total_issues INTEGER NOT NULL,
+    resolved_issues INTEGER NOT NULL,
+    open_issues INTEGER NOT NULL,
+    reopened_issues INTEGER NOT NULL,
+    avg_resolution_time_hours DECIMAL(10, 2),
+    growth_rate DECIMAL(10, 2),
+    top_category VARCHAR(50),
+    top_ward VARCHAR(100),
+    high_risk_wards JSONB,
+    executive_summary TEXT NOT NULL,
+    detailed_statistics JSONB,
+    generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    generated_by UUID REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- Audit logs table (optional)
+CREATE TABLE audit_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    action VARCHAR(100) NOT NULL,
+    resource_type VARCHAR(50),
+    resource_id UUID,
+    details JSONB,
+    ip_address INET,
+    user_agent TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes for performance
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_role ON users(role);
+
+CREATE INDEX idx_issues_status ON issues(status);
+CREATE INDEX idx_issues_category ON issues(category);
+CREATE INDEX idx_issues_ward ON issues(ward);
+CREATE INDEX idx_issues_created_at ON issues(created_at);
+CREATE INDEX idx_issues_location ON issues(latitude, longitude);
+CREATE INDEX idx_issues_reported_by ON issues(reported_by);
+CREATE INDEX idx_issues_assigned_to ON issues(assigned_to);
+
+CREATE INDEX idx_resolution_history_issue ON resolution_history(issue_id);
+CREATE INDEX idx_resolution_history_resolved_at ON resolution_history(resolved_at);
+
+CREATE INDEX idx_weekly_reports_week ON weekly_reports(week_start, week_end);
+CREATE INDEX idx_weekly_reports_generated_at ON weekly_reports(generated_at);
+
+CREATE INDEX idx_audit_logs_user ON audit_logs(user_id);
+CREATE INDEX idx_audit_logs_created_at ON audit_logs(created_at);
+```
+
+### 5.3 Database Optimization Strategies
+
+#### 5.3.1 Indexing Strategy
+
+- B-tree indexes on frequently queried columns (status, category, ward)
+- Composite index on (latitude, longitude) for geospatial queries
+- Partial indexes for active issues: `CREATE INDEX idx_active_issues ON issues(created_at) WHERE status IN ('OPEN', 'IN_PROGRESS')`
+
+#### 5.3.2 Partitioning (Future)
+
+- Partition `issues` table by created_at (monthly partitions)
+- Partition `audit_logs` by created_at (weekly partitions)
+- Improves query performance for time-range queries
+
+#### 5.3.3 Connection Pooling
+
+- Use PgBouncer or SQLAlchemy connection pool
+- Pool size: 20-50 connections
+- Max overflow: 10 connections
+- Connection timeout: 30 seconds
+
+---
+
+## 6. API Design
+
+### 6.1 API Architecture
+
+- **Protocol**: REST over HTTPS
+- **Format**: JSON
+- **Authentication**: JWT Bearer tokens
+- **Versioning**: URL-based (`/api/v1/...`)
+- **Rate Limiting**: 100 requests/minute per user
+
+### 6.2 Authentication Endpoints
+
+#### POST /api/v1/auth/register
+
+Register a new user.
+
+**Request**:
+```json
+{
+  "email": "citizen@example.com",
+  "phone": "+919876543210",
+  "password": "SecurePass123!",
+  "full_name": "Rajesh Kumar",
+  "role": "citizen"
 }
 ```
 
-### Issue Model
-
-```typescript
-interface Issue {
-  issueId: string;
-  reporterId: string; // User ID
-  description: string;
-  originalLanguage: string;
-  location: {
-    latitude: number;
-    longitude: number;
-    address: string;
-    city: string;
-    state: string;
-  };
-  mediaUrls: string[]; // URLs to photos/videos
-  voiceNoteUrl?: string;
-  categories: string[]; // AI-generated
-  status: "pending" | "in-progress" | "resolved";
-  urgencyScore: number; // 0-100, AI-generated
-  priorityVotes: number;
-  viewCount: number;
-  createdAt: timestamp;
-  updatedAt: timestamp;
-  resolvedAt?: timestamp;
-  aiMetadata: {
-    keywords: string[];
-    detectedObjects: string[];
-    confidence: number;
-  };
+**Response** (201 Created):
+```json
+{
+  "user_id": "uuid",
+  "email": "citizen@example.com",
+  "full_name": "Rajesh Kumar",
+  "role": "citizen",
+  "is_verified": false,
+  "created_at": "2026-02-15T10:30:00Z"
 }
 ```
 
-### Resolution Model
+#### POST /api/v1/auth/login
 
-```typescript
-interface Resolution {
-  resolutionId: string;
-  issueId: string;
-  officerId: string; // User ID
-  description: string;
-  originalLanguage: string;
-  mediaUrls: string[]; // Photos showing resolution
-  createdAt: timestamp;
-  updatedAt: timestamp;
+Authenticate user and receive tokens.
+
+**Request**:
+```json
+{
+  "email": "citizen@example.com",
+  "password": "SecurePass123!"
 }
 ```
 
-### Vote Model
-
-```typescript
-interface Vote {
-  voteId: string;
-  issueId: string;
-  userId: string;
-  createdAt: timestamp;
+**Response** (200 OK):
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIs...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIs...",
+  "token_type": "bearer",
+  "expires_in": 900,
+  "user": {
+    "id": "uuid",
+    "email": "citizen@example.com",
+    "full_name": "Rajesh Kumar",
+    "role": "citizen"
+  }
 }
 ```
 
-### Notification Model
+#### POST /api/v1/auth/refresh
 
-```typescript
-interface Notification {
-  notificationId: string;
-  userId: string;
-  type: "issue_updated" | "resolution_posted" | "status_changed";
-  title: string;
-  message: string;
-  relatedIssueId?: string;
-  relatedResolutionId?: string;
-  read: boolean;
-  createdAt: timestamp;
+Refresh access token.
+
+**Request**:
+```json
+{
+  "refresh_token": "eyJhbGciOiJIUzI1NiIs..."
 }
 ```
 
-### Analytics Aggregation Model (MongoDB)
-
-```typescript
-interface DailyMetrics {
-  date: date;
-  location: {
-    city: string;
-    state: string;
-  };
-  issuesCreated: number;
-  issuesResolved: number;
-  categoryBreakdown: {
-    [category: string]: number;
-  };
-  averageResolutionTime: number;
-  totalViews: number;
-  totalVotes: number;
+**Response** (200 OK):
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIs...",
+  "expires_in": 900
 }
 ```
 
-## Correctness Properties
-
-*A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
-
-
-### Property 1: Registration requires all mandatory fields
-*For any* registration attempt, if any required field (email, password, phone, role) is missing, the registration should be rejected, and if all fields are present, the registration should succeed.
-**Validates: Requirements 1.1**
-
-### Property 2: Officer accounts require verification
-*For any* Officer registration, the created account should have verification status set to "pending" until approved by an administrator.
-**Validates: Requirements 1.2**
-
-### Property 3: Valid credentials grant authentication
-*For any* registered user, logging in with their correct credentials should return a valid JWT token and user profile.
-**Validates: Requirements 1.3**
-
-### Property 4: Invalid credentials are rejected
-*For any* login attempt with incorrect credentials (wrong password, non-existent email, or mismatched combinations), the system should reject the authentication and return an error.
-**Validates: Requirements 1.4**
-
-### Property 5: Passwords are never stored in plaintext
-*For any* user account, querying the database directly should never return the original password—only a hashed version.
-**Validates: Requirements 1.5**
-
-### Property 6: Issue creation accepts multiple media types
-*For any* issue submission with valid media files (photos, videos, voice notes) and text description, the system should accept and store all provided media.
-**Validates: Requirements 2.1**
-
-### Property 7: Issues capture geolocation automatically
-*For any* issue created with location permission granted, the issue should have latitude and longitude coordinates populated.
-**Validates: Requirements 2.2**
-
-### Property 8: Invalid media uploads are rejected
-*For any* media upload that violates file type restrictions or size limits, the system should reject the upload and return an appropriate error.
-**Validates: Requirements 2.3**
-
-### Property 9: Issue creation sets required metadata
-*For any* created issue, it should have a unique identifier, timestamp, and initial status of "pending".
-**Validates: Requirements 2.4, 2.5**
-
-### Property 10: Media upload and retrieval round-trip
-*For any* valid media file uploaded to the system, retrieving it by its URL should return content that matches the original upload.
-**Validates: Requirements 2.6**
-
-### Property 11: AI analysis is triggered for all issues
-*For any* submitted issue, the AI analyzer should process it and populate AI metadata fields (categories, urgency score, keywords).
-**Validates: Requirements 3.1, 3.5**
-
-### Property 12: Issues always have at least one category
-*For any* issue after AI analysis, it should have at least one category assigned (including "uncategorized" as a fallback).
-**Validates: Requirements 3.2, 3.3**
-
-### Property 13: AI extracts structured metadata
-*For any* analyzed issue, the AI metadata should include an urgency score (0-100) and a list of extracted keywords.
-**Validates: Requirements 3.4**
-
-### Property 14: Resolution creation includes required data
-*For any* resolution posted by an Officer, it should include the Officer's ID, timestamp, description, and media URLs.
-**Validates: Requirements 4.1, 4.3**
-
-### Property 15: Resolutions update issue status
-*For any* issue that receives a resolution, its status should be updated to "resolved" and the resolution should be linked to the issue.
-**Validates: Requirements 4.2**
-
-### Property 16: Only Officers can post resolutions
-*For any* resolution posting attempt by a Citizen (non-Officer), the system should reject the request with an authorization error.
-**Validates: Requirements 4.4**
-
-### Property 17: Feed includes issues and resolutions
-*For any* issue that has a resolution, querying the feed should return both the issue and its linked resolution.
-**Validates: Requirements 4.5**
-
-### Property 18: Feed displays items in reverse chronological order
-*For any* set of issues created at different times, the feed should return them with the most recent first.
-**Validates: Requirements 5.1**
-
-### Property 19: Pagination returns distinct pages
-*For any* feed query with pagination, requesting page N and page N+1 should return different sets of items with no overlap.
-**Validates: Requirements 5.2**
-
-### Property 20: Issue feed items contain required fields
-*For any* issue in the feed response, it should include media URLs, description, location, categories, timestamp, and status.
-**Validates: Requirements 5.3**
-
-### Property 21: Resolution feed items contain required fields
-*For any* resolution in the feed response, it should include the linked issue ID, media URLs, description, Officer name, and timestamp.
-**Validates: Requirements 5.4**
-
-### Property 22: Location filter returns only matching issues
-*For any* location filter applied to the feed, all returned issues should have locations within the specified geographic area.
-**Validates: Requirements 6.1**
-
-### Property 23: Category filter returns only matching issues
-*For any* category filter applied to the feed, all returned issues should have at least one category that matches the filter.
-**Validates: Requirements 6.2**
-
-### Property 24: Time filter returns only issues in range
-*For any* time range filter applied to the feed, all returned issues should have creation timestamps within the specified range.
-**Validates: Requirements 6.3**
-
-### Property 25: Status filter returns only matching issues
-*For any* status filter applied to the feed, all returned issues should have a status that matches one of the selected status values.
-**Validates: Requirements 6.4**
-
-### Property 26: Multiple filters apply AND logic
-*For any* combination of filters (location, category, time, status), all returned issues should satisfy every applied filter simultaneously.
-**Validates: Requirements 6.5**
-
-### Property 27: Analytics reflect actual issue counts
-*For any* set of created issues, the analytics total count should exactly match the number of issues in the database.
-**Validates: Requirements 7.1, 7.7**
-
-### Property 28: Analytics aggregate by status correctly
-*For any* set of issues with various statuses, the analytics should report counts for resolved, pending, and in-progress that sum to the total count.
-**Validates: Requirements 7.2**
-
-### Property 29: Analytics aggregate by category correctly
-*For any* set of issues with various categories, the sum of issues across all category counts should equal the total number of issues.
-**Validates: Requirements 7.3**
-
-### Property 30: Analytics aggregate by location correctly
-*For any* set of issues across different locations, the sum of issues across all location counts should equal the total number of issues.
-**Validates: Requirements 7.4**
-
-### Property 31: Average resolution time calculation
-*For any* set of resolved issues with known resolution times, the analytics should calculate the average resolution time correctly (sum of times / count).
-**Validates: Requirements 7.5**
-
-### Property 32: Analytics respect date range filters
-*For any* date range filter applied to analytics, only issues created within that range should be included in the calculations.
-**Validates: Requirements 7.6**
-
-### Property 33: Language selection affects UI responses
-*For any* supported language selected by a user, API responses should include UI strings in that language.
-**Validates: Requirements 8.2**
-
-### Property 34: Language preference persists across sessions
-*For any* user who changes their language preference, logging out and back in should preserve the selected language.
-**Validates: Requirements 8.3**
-
-### Property 35: Content preserves original language
-*For any* issue or resolution created in a specific language, the original language should be stored and the content should be viewable in that language.
-**Validates: Requirements 8.4**
-
-### Property 36: Translated content is marked
-*For any* content requested in a language different from its original, the response should include a flag indicating the content has been translated.
-**Validates: Requirements 8.5**
-
-### Property 37: Manual location entry is accepted
-*For any* issue created with manually entered location data (without automatic geolocation), the system should accept and store the provided location.
-**Validates: Requirements 9.3**
-
-### Property 38: Coordinates are reverse-geocoded
-*For any* issue with latitude and longitude coordinates, the system should provide a human-readable address through reverse geocoding.
-**Validates: Requirements 9.4**
-
-### Property 39: View counts increment on access
-*For any* issue, each time it is viewed, the view count should increase by 1.
-**Validates: Requirements 10.1**
-
-### Property 40: Citizens can vote on issues
-*For any* issue and any Citizen, the Citizen should be able to cast a priority vote, and the vote count should increase by 1.
-**Validates: Requirements 10.2, 10.3**
-
-### Property 41: Duplicate votes are prevented
-*For any* Citizen who has already voted on an issue, attempting to vote again should not increase the vote count.
-**Validates: Requirements 10.4**
-
-### Property 42: Issues include engagement metrics
-*For any* issue in API responses, it should include view count and priority vote count fields.
-**Validates: Requirements 10.5**
-
-### Property 43: Status changes trigger notifications
-*For any* issue whose status changes, all users who have interacted with that issue (reporter, voters, commenters) should receive a notification.
-**Validates: Requirements 11.1**
-
-### Property 44: Resolutions trigger reporter notifications
-*For any* resolution posted to an issue, the original issue reporter should receive a notification about the resolution.
-**Validates: Requirements 11.2**
-
-### Property 45: Media available in multiple sizes
-*For any* uploaded media file, the system should provide URLs for thumbnail, medium, and full-size versions.
-**Validates: Requirements 12.2**
-
-### Property 46: Thumbnails generated automatically
-*For any* photo or video uploaded, the system should automatically generate a thumbnail image.
-**Validates: Requirements 12.3**
-
-### Property 47: Media scanned for malicious content
-*For any* media upload, the system should invoke a security scanning function before accepting the file.
-**Validates: Requirements 12.4**
-
-### Property 48: Storage quotas are enforced
-*For any* user who has reached their storage quota, attempting to upload additional media should be rejected with a quota exceeded error.
-**Validates: Requirements 12.5**
-
-### Property 49: Search covers multiple fields
-*For any* search query, the system should search across issue descriptions, locations, and categories, returning issues that match in any of these fields.
-**Validates: Requirements 13.1**
-
-### Property 50: Partial word matching in search
-*For any* search query containing a partial word, the system should return issues containing words that start with or contain that partial string.
-**Validates: Requirements 13.3**
-
-### Property 51: PII is encrypted at rest
-*For any* user record in the database, personally identifiable information fields (email, phone, name) should be stored in encrypted form.
-**Validates: Requirements 14.2**
-
-### Property 52: Account deletion removes personal data
-*For any* user who deletes their account, all personal data should be marked for deletion and removed from the system.
-**Validates: Requirements 14.3**
-
-### Property 53: Users can export their data
-*For any* user requesting a data export, the system should provide a downloadable file containing all their issues, resolutions, and profile data.
-**Validates: Requirements 14.5**
-
-### Property 54: Sensitive data access is logged
-*For any* access to sensitive user data (by admins or system processes), an audit log entry should be created with timestamp, accessor ID, and data accessed.
-**Validates: Requirements 14.6**
-
-### Property 55: Flagged content enters moderation queue
-*For any* content flagged as inappropriate, it should appear in the moderation queue with the flag reason and timestamp.
-**Validates: Requirements 15.1**
-
-### Property 56: Admins can remove content
-*For any* content in the moderation queue, an administrator should be able to remove it, making it no longer visible in the feed.
-**Validates: Requirements 15.2**
-
-### Property 57: Content removal notifies author
-*For any* content removed by moderation, the user who created that content should receive a notification explaining the removal.
-**Validates: Requirements 15.3**
-
-### Property 58: AI flags inappropriate content
-*For any* issue or resolution created, the AI moderation system should analyze it and flag content that violates policies.
-**Validates: Requirements 15.4**
-
-### Property 59: Moderation actions are logged
-*For any* moderation action (flagging, removal, approval), the system should create an audit log entry with the moderator ID, action type, content ID, and timestamp.
-**Validates: Requirements 15.5**
-
-## Error Handling
-
-### Authentication Errors
-- **Invalid credentials**: Return 401 Unauthorized with clear error message
-- **Expired token**: Return 401 with token_expired error code
-- **Insufficient permissions**: Return 403 Forbidden with permission details
-- **Account not verified**: Return 403 with verification_required error code
-
-### Validation Errors
-- **Missing required fields**: Return 400 Bad Request with list of missing fields
-- **Invalid file type**: Return 400 with supported_types list
-- **File too large**: Return 413 Payload Too Large with max_size information
-- **Invalid coordinates**: Return 400 with valid range information
-- **Storage quota exceeded**: Return 413 with quota details
-
-### Resource Errors
-- **Issue not found**: Return 404 Not Found
-- **Resolution not found**: Return 404 Not Found
-- **User not found**: Return 404 Not Found
-- **Media not found**: Return 404 Not Found
-
-### Service Errors
-- **AI analysis failure**: Log error, assign "uncategorized", continue processing
-- **Media upload failure**: Return 503 Service Unavailable, suggest retry
-- **Database connection failure**: Return 503, implement retry logic with exponential backoff
-- **External API failure** (geocoding, translation): Log error, use fallback or cached data
-
-### Rate Limiting
-- **Too many requests**: Return 429 Too Many Requests with retry_after header
-- **Implement rate limits**: 100 requests per minute per user for API calls
-- **Media upload limits**: 10 uploads per hour per user
-
-### Error Response Format
-
-```typescript
-interface ErrorResponse {
-  error: {
-    code: string;
-    message: string;
-    details?: object;
-    timestamp: string;
-  };
+### 6.3 Issue Management Endpoints
+
+#### POST /api/v1/issues
+
+Create a new issue.
+
+**Headers**:
+```
+Authorization: Bearer {access_token}
+Content-Type: multipart/form-data
+```
+
+**Request** (multipart/form-data):
+```
+title: "Large pothole on MG Road"
+description: "बड़ा गड्ढा है जो खतरनाक है" (Hindi)
+latitude: 12.9716
+longitude: 77.5946
+language: "hi"
+image: [file upload]
+```
+
+**Response** (201 Created):
+```json
+{
+  "issue_id": "uuid",
+  "title": "Large pothole on MG Road",
+  "description": "बड़ा गड्ढा है जो खतरनाक है",
+  "description_translated": "There is a large pothole which is dangerous",
+  "category": "pothole",
+  "category_confidence": 0.92,
+  "status": "OPEN",
+  "latitude": 12.9716,
+  "longitude": 77.5946,
+  "ward": "Ward 23 - Koramangala",
+  "image_url": "https://s3.amazonaws.com/...",
+  "reported_by": "uuid",
+  "created_at": "2026-02-15T10:30:00Z"
 }
 ```
 
-## Testing Strategy
+#### GET /api/v1/issues
 
-### Dual Testing Approach
+List issues with filtering and pagination.
 
-The system will employ both unit testing and property-based testing to ensure comprehensive coverage:
+**Query Parameters**:
 
-**Unit Tests** focus on:
-- Specific examples demonstrating correct behavior
-- Edge cases (empty inputs, boundary values, special characters)
-- Error conditions and exception handling
-- Integration points between services
-- Mock external dependencies (cloud storage, AI services)
+- `status`: Filter by status (open, resolved, etc.)
+- `category`: Filter by category
+- `ward`: Filter by ward
+- `reported_by`: Filter by user ID
+- `page`: Page number (default: 1)
+- `limit`: Items per page (default: 20, max: 100)
+- `sort`: Sort field (created_at, updated_at)
+- `order`: Sort order (asc, desc)
 
-**Property-Based Tests** focus on:
-- Universal properties that hold for all inputs
-- Comprehensive input coverage through randomization
-- Invariants that must be maintained
-- Round-trip properties (upload/download, serialize/deserialize)
-- Relationship properties between components
-
-### Property-Based Testing Configuration
-
-**Framework Selection:**
-- **JavaScript/TypeScript**: fast-check library
-- **Python**: Hypothesis library
-
-**Test Configuration:**
-- Minimum 100 iterations per property test
-- Each property test references its design document property
-- Tag format: `Feature: citizen-issue-reporter, Property {number}: {property_text}`
-
-**Example Property Test Structure:**
-
-```typescript
-// Feature: citizen-issue-reporter, Property 9: Issue creation sets required metadata
-describe('Issue Creation Metadata', () => {
-  it('should set unique ID, timestamp, and pending status for all issues', () => {
-    fc.assert(
-      fc.property(
-        fc.record({
-          description: fc.string({ minLength: 1 }),
-          location: fc.record({
-            latitude: fc.double({ min: -90, max: 90 }),
-            longitude: fc.double({ min: -180, max: 180 })
-          }),
-          reporterId: fc.uuid()
-        }),
-        async (issueData) => {
-          const issue = await createIssue(issueData);
-          
-          expect(issue.issueId).toBeDefined();
-          expect(issue.createdAt).toBeInstanceOf(Date);
-          expect(issue.status).toBe('pending');
-          
-          // Verify uniqueness by creating another issue
-          const issue2 = await createIssue(issueData);
-          expect(issue2.issueId).not.toBe(issue.issueId);
-        }
-      ),
-      { numRuns: 100 }
-    );
-  });
-});
+**Request**:
+```
+GET /api/v1/issues?status=OPEN&ward=Ward%2023&page=1&limit=20
 ```
 
-### Test Coverage Goals
+**Response** (200 OK):
+```json
+{
+  "total": 156,
+  "page": 1,
+  "limit": 20,
+  "pages": 8,
+  "issues": [
+    {
+      "issue_id": "uuid",
+      "title": "Large pothole on MG Road",
+      "category": "pothole",
+      "status": "OPEN",
+      "ward": "Ward 23 - Koramangala",
+      "created_at": "2026-02-15T10:30:00Z",
+      "image_url": "https://s3.amazonaws.com/..."
+    }
+  ]
+}
+```
 
-- **Unit test coverage**: Minimum 80% code coverage
-- **Property test coverage**: All 59 correctness properties implemented
-- **Integration test coverage**: All API endpoints tested
-- **End-to-end tests**: Critical user flows (issue creation, resolution posting, feed viewing)
+#### GET /api/v1/issues/{issue_id}
 
-### Testing Environments
+Get detailed information about a specific issue.
 
-- **Local**: Docker Compose with all services
-- **CI/CD**: Automated test runs on every commit
-- **Staging**: Full integration testing with production-like data
-- **Production**: Monitoring and alerting for errors
+**Response** (200 OK):
+```json
+{
+  "issue_id": "uuid",
+  "title": "Large pothole on MG Road",
+  "description": "बड़ा गड्ढा है जो खतरनाक है",
+  "description_translated": "There is a large pothole which is dangerous",
+  "category": "pothole",
+  "status": "OPEN",
+  "latitude": 12.9716,
+  "longitude": 77.5946,
+  "address": "MG Road, Koramangala, Bangalore",
+  "ward": "Ward 23 - Koramangala",
+  "image_url": "https://s3.amazonaws.com/...",
+  "reported_by": {
+    "id": "uuid",
+    "name": "Rajesh Kumar",
+    "is_verified": true
+  },
+  "assigned_to": null,
+  "reopen_count": 0,
+  "resolution_history": [],
+  "created_at": "2026-02-15T10:30:00Z",
+  "updated_at": "2026-02-15T10:30:00Z"
+}
+```
 
-### Performance Testing
+#### PATCH /api/v1/issues/{issue_id}/resolve
 
-- **Load testing**: Simulate 10,000 concurrent users
-- **Stress testing**: Find breaking points for each service
-- **Media upload testing**: Test with various file sizes up to limits
-- **Database query optimization**: Ensure feed queries under 100ms
-- **AI analysis latency**: Target under 2 seconds per issue
+Mark an issue as resolved (Officer only).
 
-### Security Testing
+**Headers**:
+```
+Authorization: Bearer {access_token}
+Content-Type: multipart/form-data
+```
 
-- **Penetration testing**: Regular security audits
-- **SQL injection testing**: Automated scanning
-- **XSS prevention**: Input sanitization testing
-- **Authentication testing**: Token expiration and refresh flows
-- **Authorization testing**: Role-based access control verification
-- **Media scanning**: Malicious file upload attempts
+**Request**:
+```
+resolution_notes: "Pothole filled with asphalt on 15th Feb"
+proof_image: [file upload]
+```
 
-## Implementation Notes
+**Response** (200 OK):
+```json
+{
+  "issue_id": "uuid",
+  "status": "RESOLVED",
+  "resolved_at": "2026-02-15T14:30:00Z",
+  "resolved_by": {
+    "id": "uuid",
+    "name": "Officer Sharma",
+    "department": "Public Works"
+  },
+  "resolution_proof_url": "https://s3.amazonaws.com/...",
+  "resolution_notes": "Pothole filled with asphalt on 15th Feb"
+}
+```
 
-### Phased Rollout
+#### POST /api/v1/issues/{issue_id}/reopen
 
-**Phase 1: MVP (Months 1-3)**
-- User authentication (Citizens and Officers)
-- Basic issue reporting (photos and text)
-- Simple feed interface
-- Basic categorization (manual or simple keyword-based)
-- Mobile-responsive web app
+Reopen a resolved issue (Citizen only).
 
-**Phase 2: Enhanced Features (Months 4-6)**
-- AI-powered categorization
-- Advanced filtering system
-- Analytics dashboard
-- Video and voice note support
-- Push notifications
+**Request**:
+```json
+{
+  "reopen_reason": "The pothole has reappeared after rain. The repair was not done properly."
+}
+```
 
-**Phase 3: Scale and Polish (Months 7-9)**
-- Multi-language support
+**Response** (200 OK):
+```json
+{
+  "issue_id": "uuid",
+  "status": "REOPENED",
+  "reopen_count": 1,
+  "last_reopened_at": "2026-02-16T10:00:00Z",
+  "reopen_reason": "The pothole has reappeared after rain. The repair was not done properly.",
+  "can_reopen_again": true,
+  "cooldown_expires_at": "2026-02-17T22:00:00Z"
+}
+```
+
+**Error Response** (400 Bad Request):
+```json
+{
+  "error": "reopen_limit_exceeded",
+  "message": "Maximum reopen limit (2) reached for this issue"
+}
+```
+
+### 6.4 Analytics & Statistics Endpoints
+
+#### GET /api/v1/stats
+
+Get overall system statistics.
+
+**Query Parameters**:
+
+- `period`: Time period (week, month, year, all)
+- `ward`: Filter by ward (optional)
+
+**Response** (200 OK):
+```json
+{
+  "period": "week",
+  "total_issues": 1247,
+  "resolved_issues": 892,
+  "open_issues": 355,
+  "resolution_rate": 71.5,
+  "avg_resolution_time_hours": 48.3,
+  "growth_rate": 12.5,
+  "category_breakdown": {
+    "pothole": 456,
+    "garbage": 312,
+    "water": 189,
+    "electrical": 145,
+    "road": 98,
+    "drainage": 47
+  },
+  "ward_breakdown": [
+    {
+      "ward": "Ward 23 - Koramangala",
+      "total": 87,
+      "resolved": 62,
+      "risk_score": 67.5
+    }
+  ]
+}
+```
+
+#### GET /api/v1/stats/risk-zones
+
+Get high-risk zones based on risk scoring.
+
+**Response** (200 OK):
+```json
+{
+  "high_risk_zones": [
+    {
+      "ward": "Ward 23 - Koramangala",
+      "risk_score": 87.5,
+      "risk_level": "CRITICAL",
+      "total_issues": 87,
+      "open_issues": 34,
+      "avg_days_unresolved": 12.3,
+      "repeated_reports": 23,
+      "growth_rate": 45.2
+    },
+    {
+      "ward": "Ward 15 - Indiranagar",
+      "risk_score": 76.2,
+      "risk_level": "HIGH",
+      "total_issues": 65,
+      "open_issues": 28,
+      "avg_days_unresolved": 9.8,
+      "repeated_reports": 18,
+      "growth_rate": 32.1
+    }
+  ]
+}
+```
+
+### 6.5 Weekly Report Endpoints
+
+#### POST /api/v1/reports/generate
+
+Generate a new weekly report (Admin only).
+
+**Request**:
+```json
+{
+  "week_start": "2026-02-09",
+  "week_end": "2026-02-15"
+}
+```
+
+**Response** (201 Created):
+```json
+{
+  "report_id": "uuid",
+  "week_start": "2026-02-09",
+  "week_end": "2026-02-15",
+  "status": "generating",
+  "message": "Report generation started. Check status at /api/v1/reports/{report_id}"
+}
+```
+
+#### GET /api/v1/reports/latest
+
+Get the most recent weekly report.
+
+**Response** (200 OK):
+```json
+{
+  "report_id": "uuid",
+  "week_start": "2026-02-09",
+  "week_end": "2026-02-15",
+  "total_issues": 1247,
+  "resolved_issues": 892,
+  "open_issues": 355,
+  "growth_rate": 12.5,
+  "avg_resolution_time_hours": 48.3,
+  "top_category": "pothole",
+  "top_ward": "Ward 23 - Koramangala",
+  "high_risk_wards": [
+    {
+      "ward": "Ward 23",
+      "risk_score": 87.5
+    }
+  ],
+  "executive_summary": "This week saw a 12.5% increase in reported civic issues...",
+  "generated_at": "2026-02-16T02:00:00Z"
+}
+```
+
+#### GET /api/v1/reports
+
+List all historical reports.
+
+**Query Parameters**:
+
+- `page`: Page number
+- `limit`: Items per page
+
+**Response** (200 OK):
+```json
+{
+  "total": 52,
+  "page": 1,
+  "limit": 10,
+  "reports": [
+    {
+      "report_id": "uuid",
+      "week_start": "2026-02-09",
+      "week_end": "2026-02-15",
+      "total_issues": 1247,
+      "growth_rate": 12.5,
+      "generated_at": "2026-02-16T02:00:00Z"
+    }
+  ]
+}
+```
+
+#### GET /api/v1/reports/{report_id}
+
+Get a specific report by ID.
+
+**Response**: Same as `/api/v1/reports/latest`
+
+### 6.6 Error Response Format
+
+All API errors follow a consistent format:
+
+```json
+{
+  "error": "error_code",
+  "message": "Human-readable error message",
+  "details": {
+    "field": "Additional context"
+  },
+  "timestamp": "2026-02-15T10:30:00Z"
+}
+```
+
+**Common Error Codes**:
+
+- `400`: Bad Request - Invalid input
+- `401`: Unauthorized - Missing or invalid token
+- `403`: Forbidden - Insufficient permissions
+- `404`: Not Found - Resource doesn't exist
+- `409`: Conflict - Resource state conflict
+- `422`: Unprocessable Entity - Validation failed
+- `429`: Too Many Requests - Rate limit exceeded
+- `500`: Internal Server Error - Server-side error
+
+---
+
+## 7. Security & Non-Functional Requirements
+
+### 7.1 Authentication & Authorization
+
+#### 7.1.1 Password Security
+
+- **Hashing Algorithm**: bcrypt with cost factor 12
+- **Password Requirements**:
+  - Minimum 8 characters
+  - At least one uppercase letter
+  - At least one lowercase letter
+  - At least one number
+  - At least one special character
+- **Password Reset**: Email-based with time-limited tokens (1 hour expiry)
+
+#### 7.1.2 JWT Token Security
+
+- **Algorithm**: HS256 (HMAC with SHA-256)
+- **Access Token Expiry**: 15 minutes
+- **Refresh Token Expiry**: 7 days
+- **Token Storage**: HTTP-only cookies (frontend) + secure storage (mobile)
+- **Token Rotation**: Refresh tokens rotated on each use
+
+#### 7.1.3 Role-Based Access Control (RBAC)
+
+**Permission Matrix**:
+
+| Action | Citizen | Officer | Admin |
+|--------|---------|---------|-------|
+| Report Issue | ✓ | ✓ | ✓ |
+| View Own Issues | ✓ | ✓ | ✓ |
+| View All Issues | ✗ | ✓ | ✓ |
+| Resolve Issue | ✗ | ✓ | ✓ |
+| Reopen Issue | ✓ (own) | ✗ | ✓ |
+| View Analytics | Limited | ✓ | ✓ |
+| Generate Reports | ✗ | ✗ | ✓ |
+| Manage Users | ✗ | ✗ | ✓ |
+
+### 7.2 Input Validation
+
+#### 7.2.1 Backend Validation (Pydantic)
+
+```python
+from pydantic import BaseModel, Field, validator
+
+class IssueCreate(BaseModel):
+    title: str = Field(..., min_length=10, max_length=200)
+    description: str = Field(..., min_length=20, max_length=2000)
+    latitude: float = Field(..., ge=-90, le=90)
+    longitude: float = Field(..., ge=-180, le=180)
+    language: str = Field(..., regex="^[a-z]{2}$")
+    
+    @validator('title', 'description')
+    def sanitize_text(cls, v):
+        # Remove potentially harmful characters
+        return v.strip()
+```
+
+#### 7.2.2 File Upload Validation
+
+- **Allowed Types**: JPEG, PNG only
+- **Max Size**: 5MB per image
+- **Virus Scanning**: ClamAV integration (optional)
+- **Image Processing**: Resize to max 1920x1080, strip EXIF data
+
+### 7.3 Rate Limiting
+
+**Limits by Endpoint**:
+
+- Authentication: 5 requests/minute
+- Issue Creation: 10 requests/hour per user
+- Issue Listing: 100 requests/minute
+- Analytics: 50 requests/minute
+- Report Generation: 1 request/hour (admin only)
+
+**Implementation**: Redis-based token bucket algorithm
+
+### 7.4 Data Privacy & Compliance
+
+#### 7.4.1 Personal Data Protection
+
+- **PII Encryption**: Sensitive fields encrypted at rest
+- **Data Minimization**: Collect only necessary information
+- **Right to Deletion**: Users can request account deletion
+- **Data Retention**: Issues retained for 5 years, then archived
+
+#### 7.4.2 Audit Logging
+
+All sensitive operations logged:
+
+- User authentication attempts
+- Issue status changes
+- Resolution actions
+- Report generation
+- Admin actions
+
+### 7.5 Scalability Considerations
+
+#### 7.5.1 Horizontal Scaling
+
+- **Backend**: Stateless FastAPI instances behind load balancer
+- **Database**: Read replicas for analytics queries
+- **Storage**: S3 auto-scales
+- **Caching**: Redis for session management and rate limiting
+
+#### 7.5.2 Performance Targets
+
+- **API Response Time**: < 200ms (p95)
+- **Page Load Time**: < 2 seconds
+- **Image Upload**: < 5 seconds
+- **Report Generation**: < 30 seconds
+- **Concurrent Users**: 10,000+
+
+#### 7.5.3 Caching Strategy
+
+- **CDN**: CloudFront for static assets
+- **API Caching**: Redis for frequently accessed data
+  - Issue listings: 5 minute TTL
+  - Statistics: 15 minute TTL
+  - Weekly reports: 1 hour TTL
+- **Database Query Caching**: PostgreSQL query result cache
+
+### 7.6 Fault Tolerance
+
+#### 7.6.1 High Availability
+
+- **Multi-AZ Deployment**: RDS and EC2 across availability zones
+- **Auto-Scaling**: EC2 Auto Scaling Groups
+- **Health Checks**: ALB health checks every 30 seconds
+- **Failover**: Automatic RDS failover < 2 minutes
+
+#### 7.6.2 Backup & Recovery
+
+- **Database Backups**: Automated daily backups, 7-day retention
+- **Point-in-Time Recovery**: 5-minute granularity
+- **S3 Versioning**: Enabled for all buckets
+- **Disaster Recovery**: Cross-region replication (optional)
+
+#### 7.6.3 Error Handling
+
+- **Graceful Degradation**: System remains functional if AI service fails
+- **Retry Logic**: Exponential backoff for transient failures
+- **Circuit Breaker**: Prevent cascading failures
+- **Fallback Mechanisms**: Template-based responses when AI unavailable
+
+### 7.7 Monitoring & Logging
+
+#### 7.7.1 CloudWatch Metrics
+
+- **Application Metrics**:
+  - Request count and latency
+  - Error rates by endpoint
+  - AI processing success rate
+  - Database connection pool usage
+
+- **Infrastructure Metrics**:
+  - CPU and memory utilization
+  - Network throughput
+  - Disk I/O
+  - RDS performance insights
+
+#### 7.7.2 Alerting
+
+- **Critical Alerts** (PagerDuty/SNS):
+  - API error rate > 5%
+  - Database connection failures
+  - S3 upload failures > 10%
+  - AI service unavailable > 5 minutes
+
+- **Warning Alerts** (Email):
+  - High response times (> 500ms)
+  - Disk usage > 80%
+  - Unusual traffic patterns
+
+#### 7.7.3 Structured Logging
+
+```python
+import structlog
+
+logger = structlog.get_logger()
+
+logger.info(
+    "issue_created",
+    issue_id=issue.id,
+    user_id=user.id,
+    category=issue.category,
+    ward=issue.ward,
+    processing_time_ms=elapsed_ms
+)
+```
+
+---
+
+## 8. Deployment Design
+
+### 8.1 Infrastructure as Code
+
+#### 8.1.1 AWS CloudFormation / Terraform
+
+Define infrastructure as code for reproducible deployments:
+
+```hcl
+# Example Terraform structure
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
+}
+
+resource "aws_rds_instance" "postgres" {
+  engine               = "postgres"
+  engine_version       = "15.4"
+  instance_class       = "db.t3.medium"
+  allocated_storage    = 100
+  multi_az             = true
+  backup_retention_period = 7
+}
+
+resource "aws_s3_bucket" "issues" {
+  bucket = "fixit-hub-issues"
+  versioning {
+    enabled = true
+  }
+}
+```
+
+### 8.2 Containerization
+
+#### 8.2.1 Docker Configuration
+
+```dockerfile
+# Backend Dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+#### 8.2.2 Docker Compose (Development)
+
+```yaml
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:pass@db:5432/citizen_reporter
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=citizen_reporter
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:
+```
+
+### 8.3 AWS Deployment Strategy
+
+#### 8.3.1 Option A: EC2 with Auto Scaling
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Route 53 (DNS)                       │
+└────────────────────┬────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────┐
+│              CloudFront (CDN)                           │
+│              - Frontend (S3)                            │
+└────────────────────┬────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────┐
+│        Application Load Balancer (ALB)                  │
+└────────┬───────────────────────────────────────┬────────┘
+         │                                       │
+┌────────▼────────┐                    ┌────────▼────────┐
+│  EC2 Instance   │                    │  EC2 Instance   │
+│  (FastAPI)      │                    │  (FastAPI)      │
+│  AZ-1           │                    │  AZ-2           │
+└─────────────────┘                    └─────────────────┘
+         │                                       │
+         └───────────────┬───────────────────────┘
+                         │
+                ┌────────▼────────┐
+                │   RDS Primary   │
+                │   (Multi-AZ)    │
+                └────────┬────────┘
+                         │
+                ┌────────▼────────┐
+                │  RDS Replica    │
+                │  (Read-only)    │
+                └─────────────────┘
+```
+
+**Components**:
+
+- **Route 53**: DNS management
+- **CloudFront**: CDN for frontend
+- **S3**: Static website hosting
+- **ALB**: Load balancing and SSL termination
+- **EC2 Auto Scaling Group**: 2-10 instances
+- **RDS Multi-AZ**: High availability database
+- **ElastiCache Redis**: Session and cache management
+
+#### 8.3.2 Option B: AWS App Runner (Simplified)
+
+```
+┌─────────────────────────────────────────────────────────┐
+│              AWS App Runner Service                     │
+│              - Auto-scaling                             │
+│              - Built-in load balancing                  │
+│              - Automatic deployments                    │
+└────────────────────┬────────────────────────────────────┘
+                     │
+         ┌───────────┴───────────┐
+         │                       │
+┌────────▼────────┐    ┌────────▼────────┐
+│   RDS Primary   │    │   S3 Buckets    │
+│   (Multi-AZ)    │    │   - Images      │
+└─────────────────┘    └─────────────────┘
+```
+
+**Advantages**:
+
+- Simplified deployment
+- Automatic scaling
+- Lower operational overhead
+- Pay-per-use pricing
+
+### 8.4 CI/CD Pipeline
+
+#### 8.4.1 GitHub Actions Workflow
+
+```yaml
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run tests
+        run: |
+          pip install -r requirements.txt
+          pytest tests/
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Docker image
+        run: docker build -t fixit-hub:${{ github.sha }} .
+      - name: Push to ECR
+        run: |
+          aws ecr get-login-password | docker login --username AWS --password-stdin
+          docker push fixit-hub:${{ github.sha }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to EC2
+        run: |
+          aws ecs update-service --cluster prod --service backend --force-new-deployment
+```
+
+#### 8.4.2 Deployment Stages
+
+1. **Development**: Auto-deploy on push to `dev` branch
+2. **Staging**: Auto-deploy on push to `staging` branch
+3. **Production**: Manual approval + deploy on push to `main`
+
+### 8.5 Environment Configuration
+
+#### 8.5.1 Environment Variables
+
+```bash
+# Database
+DATABASE_URL=postgresql://user:pass@host:5432/db
+DATABASE_POOL_SIZE=20
+
+# AWS
+AWS_REGION=ap-south-1
+AWS_ACCESS_KEY_ID=AKIA...
+AWS_SECRET_ACCESS_KEY=...
+S3_BUCKET_ISSUES=fixit-hub-issues
+S3_BUCKET_RESOLUTIONS=fixit-hub-resolutions
+
+# AI Service
+AI_SERVICE_PROVIDER=bedrock  # or openai
+BEDROCK_MODEL_ID=anthropic.claude-v2
+OPENAI_API_KEY=sk-...
+
+# Security
+JWT_SECRET_KEY=...
+JWT_ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=15
+REFRESH_TOKEN_EXPIRE_DAYS=7
+
+# Application
+ENVIRONMENT=production
+LOG_LEVEL=INFO
+CORS_ORIGINS=https://fixithub.gov.in
+```
+
+### 8.6 Cost Estimation (Monthly)
+
+**AWS Services** (Estimated for 100,000 monthly active users):
+
+| Service | Configuration | Monthly Cost (USD) |
+|---------|--------------|-------------------|
+| EC2 (t3.medium × 4) | 4 instances, 24/7 | $120 |
+| RDS PostgreSQL (db.t3.medium) | Multi-AZ, 100GB | $150 |
+| S3 Storage | 500GB storage, 1TB transfer | $30 |
+| CloudFront | 1TB data transfer | $85 |
+| Application Load Balancer | 24/7 operation | $25 |
+| ElastiCache Redis (cache.t3.micro) | Single node | $15 |
+| CloudWatch | Logs and metrics | $20 |
+| Amazon Bedrock | 1M tokens/month | $50 |
+| **Total** | | **~$495/month** |
+
+**Scaling Considerations**:
+
+- 1M users: ~$2,000/month
+- 10M users: ~$8,000/month
+
+---
+
+## 9. Future Enhancements
+
+### 9.1 IoT Integration
+
+#### 9.1.1 Smart Sensors
+
+- **Pothole Detection**: Accelerometer-based sensors in municipal vehicles
+- **Garbage Overflow**: Ultrasonic sensors in bins
+- **Water Leakage**: Pressure sensors in pipelines
+- **Streetlight Monitoring**: IoT-enabled streetlights
+
+#### 9.1.2 Architecture Extension
+
+```
+IoT Devices → AWS IoT Core → Lambda → API → Database
+```
+
+**Benefits**:
+
+- Proactive issue detection
+- Reduced citizen reporting burden
+- Real-time infrastructure monitoring
+
+### 9.2 Predictive ML Model Training
+
+#### 9.2.1 Predictive Models
+
+- **Issue Recurrence Prediction**: Predict which resolved issues likely to recur
+- **Resolution Time Estimation**: Estimate time to resolve based on category/location
+- **Resource Allocation**: Optimize officer assignment based on workload
+- **Seasonal Patterns**: Identify seasonal trends (monsoon-related issues)
+
+#### 9.2.2 ML Pipeline
+
+```
+Historical Data → Feature Engineering → Model Training (SageMaker) → 
+Model Deployment → Inference API → Dashboard
+```
+
+### 9.3 Geo-Spatial Heatmaps
+
+#### 9.3.1 Visualization Features
+
+- **Issue Density Heatmap**: Color-coded map showing issue concentration
+- **Category-Specific Maps**: Separate heatmaps for each issue type
+- **Temporal Animation**: Time-lapse showing issue evolution
+- **Cluster Analysis**: Identify hotspots using DBSCAN algorithm
+
+#### 9.3.2 Technology Stack
+
+- **Frontend**: Leaflet.js with heatmap plugin
+- **Backend**: PostGIS extension for spatial queries
+- **Data Processing**: GeoPandas for spatial analysis
+
+```sql
+-- PostGIS spatial query example
+SELECT 
+    ward,
+    ST_AsGeoJSON(ST_Centroid(ST_Collect(ST_MakePoint(longitude, latitude)))) as center,
+    COUNT(*) as issue_count
+FROM issues
+WHERE created_at >= NOW() - INTERVAL '30 days'
+GROUP BY ward;
+```
+
+### 9.4 SMS Integration for Rural Users
+
+#### 9.4.1 SMS-Based Reporting
+
+- **Toll-Free Number**: Citizens send SMS to report issues
+- **Format**: `REPORT <category> <location> <description>`
+- **Example**: `REPORT POTHOLE MG_ROAD Large pothole near bus stop`
+
+#### 9.4.2 SMS Gateway Integration
+
+- **Service**: AWS SNS or Twilio
+- **Flow**: SMS → Gateway → Lambda → API → Database
+- **Response**: Confirmation SMS with issue ID
+
+#### 9.4.3 Voice Call Support
+
+- **IVR System**: Interactive Voice Response for illiterate users
+- **Language Support**: Regional language voice prompts
+- **Recording**: Voice description converted to text via AWS Transcribe
+
+### 9.5 Mobile Application Expansion
+
+#### 9.5.1 Native Mobile Apps
+
+- **Platforms**: iOS (Swift) and Android (Kotlin)
+- **Features**:
+  - Offline issue drafting
+  - Push notifications for status updates
+  - Camera integration for instant photo capture
+  - GPS auto-detection
+  - Voice input for descriptions
+
+#### 9.5.2 Progressive Web App (PWA)
+
+- **Advantages**: Single codebase, works offline, installable
+- **Service Workers**: Cache API responses for offline access
+- **Background Sync**: Queue issues when offline, sync when online
+
+### 9.6 Gamification & Citizen Engagement
+
+#### 9.6.1 Citizen Reputation System
+
+- **Points**: Earn points for verified reports
+- **Badges**: "Top Reporter", "Quick Responder", "Community Hero"
+- **Leaderboards**: Ward-wise and city-wise rankings
+- **Rewards**: Recognition certificates, priority support
+
+#### 9.6.2 Officer Performance Metrics
+
+- **KPIs**: Resolution time, citizen satisfaction, reopen rate
+- **Public Dashboard**: Transparent officer performance
+- **Incentives**: Performance-based recognition
+
+### 9.7 Integration with Existing Government Systems
+
+#### 9.7.1 API Integrations
+
+- **Municipal Corporation Systems**: Sync with existing work order systems
+- **311 Services**: Integration with national helpline
+- **Smart City Platforms**: Data sharing with smart city initiatives
+- **GIS Systems**: Integration with government GIS databases
+
+#### 9.7.2 Data Export
+
+- **Formats**: CSV, JSON, XML, GeoJSON
+- **Scheduled Exports**: Daily/weekly data dumps
+- **API Access**: RESTful API for third-party integrations
+
+### 9.8 Advanced Analytics
+
+#### 9.8.1 Sentiment Analysis
+
+- Analyze citizen sentiment from issue descriptions
+- Track satisfaction trends over time
+- Identify areas of frustration
+
+#### 9.8.2 Root Cause Analysis
+
+- Identify underlying infrastructure problems
+- Correlate multiple issue types
+- Recommend preventive maintenance
+
+#### 9.8.3 Budget Optimization
+
+- Estimate costs for issue resolution
+- Prioritize based on cost-benefit analysis
+- Track spending vs. outcomes
+
+---
+
+## 10. Technical Stack Summary
+
+### 10.1 Frontend
+
+- **Framework**: React 18+
+- **Build Tool**: Vite
+- **UI Library**: Material-UI or Tailwind CSS
+- **State Management**: Redux Toolkit or Zustand
+- **Maps**: Leaflet.js or Google Maps API
+- **Charts**: Chart.js or Recharts
+- **HTTP Client**: Axios
+
+### 10.2 Backend
+
+- **Framework**: FastAPI (Python 3.11+)
+- **ORM**: SQLAlchemy 2.0
+- **Validation**: Pydantic v2
+- **Authentication**: python-jose (JWT)
+- **Password Hashing**: bcrypt
+- **Async HTTP**: httpx
+- **Image Processing**: Pillow
+- **Task Queue**: Celery (optional)
+- **Testing**: pytest, pytest-asyncio
+
+### 10.3 Database & Storage
+
+- **Primary Database**: PostgreSQL 15+
+- **Extensions**: PostGIS (spatial), pg_trgm (text search)
+- **Object Storage**: AWS S3
+- **Cache**: Redis 7+
+- **Search**: PostgreSQL Full-Text Search or Elasticsearch (optional)
+
+### 10.4 AI & ML
+
+- **Primary**: Amazon Bedrock (Claude/Titan)
+- **Alternative**: OpenAI API, Anthropic API
+- **Translation**: AWS Translate (fallback)
+- **ML Training**: AWS SageMaker (future)
+
+### 10.5 Infrastructure
+
+- **Cloud Provider**: AWS
+- **Compute**: EC2 or App Runner
+- **Load Balancer**: Application Load Balancer
+- **CDN**: CloudFront
+- **DNS**: Route 53
+- **Monitoring**: CloudWatch
+- **Secrets**: AWS Secrets Manager
+- **IaC**: Terraform or CloudFormation
+
+### 10.6 DevOps
+
+- **Version Control**: Git (GitHub/GitLab)
+- **CI/CD**: GitHub Actions or GitLab CI
+- **Containerization**: Docker
+- **Container Registry**: AWS ECR
+- **Orchestration**: ECS or Kubernetes (optional)
+
+---
+
+## 11. Development Roadmap
+
+### Phase 1: MVP (Months 1-2)
+
+- User authentication and registration
+- Basic issue reporting with image upload
+- Map-based location tagging
+- Issue listing and filtering
+- Officer resolution workflow
+- Basic analytics dashboard
+
+### Phase 2: AI Integration (Month 3)
+
+- Multilingual translation
+- Automatic classification
+- AI-powered weekly reports
+- Risk scoring algorithm
+
+### Phase 3: Advanced Features (Month 4)
+
+- Reopen control mechanism
+- Resolution history tracking
+- Advanced analytics and visualizations
 - Performance optimization
-- Advanced search
-- Content moderation tools
-- Mobile native apps (iOS/Android)
+- Security hardening
 
-### Scalability Considerations
+### Phase 4: Scale & Polish (Month 5-6)
 
-- **Database sharding**: Partition by geographic region
-- **CDN for media**: Reduce latency for media delivery
-- **Caching strategy**: Redis for frequently accessed data
-- **Async processing**: Queue-based architecture for AI analysis
-- **Horizontal scaling**: Kubernetes for service orchestration
-- **Database read replicas**: Separate read and write operations
+- Load testing and optimization
+- Mobile-responsive improvements
+- Comprehensive documentation
+- User training materials
+- Production deployment
+- Monitoring and alerting setup
 
-### Monitoring and Observability
+### Phase 5: Future Enhancements (Month 7+)
 
-- **Application metrics**: Response times, error rates, throughput
-- **Business metrics**: Issues created, resolution rate, user engagement
-- **Infrastructure metrics**: CPU, memory, disk, network usage
-- **Logging**: Centralized logging with ELK stack or similar
-- **Alerting**: PagerDuty or similar for critical issues
-- **Tracing**: Distributed tracing for request flows across services
+- IoT integration
+- Predictive ML models
+- Mobile applications
+- SMS integration
+- Gamification features
+
+---
+
+## 12. Success Metrics
+
+### 12.1 User Engagement
+
+- **Target**: 100,000 registered users in first year
+- **Active Users**: 30% monthly active user rate
+- **Issue Reports**: 50,000+ issues reported monthly
+- **Resolution Rate**: 75%+ issues resolved within 7 days
+
+### 12.2 System Performance
+
+- **Uptime**: 99.9% availability
+- **Response Time**: < 200ms API response (p95)
+- **Error Rate**: < 0.5% of requests
+- **AI Processing**: 95%+ success rate
+
+### 12.3 Governance Impact
+
+- **Response Time**: 50% reduction in average resolution time
+- **Citizen Satisfaction**: 80%+ satisfaction rate
+- **Transparency**: 100% of resolutions with proof
+- **Predictive Accuracy**: 70%+ accuracy in risk zone identification
+
+### 12.4 Cost Efficiency
+
+- **Infrastructure Cost**: < $0.05 per active user per month
+- **AI Processing Cost**: < $0.01 per issue
+- **Total Cost of Ownership**: 60% lower than traditional systems
+
+---
+
+## 13. Risk Mitigation
+
+### 13.1 Technical Risks
+
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| AI service downtime | High | Fallback to manual classification, queue for retry |
+| Database failure | Critical | Multi-AZ deployment, automated backups, read replicas |
+| S3 outage | Medium | Retry logic, temporary local storage |
+| High traffic spikes | Medium | Auto-scaling, CDN caching, rate limiting |
+| Security breach | Critical | Regular audits, penetration testing, encryption |
+
+### 13.2 Operational Risks
+
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| Spam/fake reports | Medium | Captcha, rate limiting, user verification |
+| Officer non-compliance | High | Performance tracking, escalation workflow |
+| Data privacy violations | Critical | GDPR-like compliance, regular audits |
+| Budget overruns | Medium | Cost monitoring, auto-scaling limits |
+| User adoption challenges | High | User training, multilingual support, simple UX |
+
+### 13.3 Business Risks
+
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| Government policy changes | High | Flexible architecture, modular design |
+| Competing solutions | Medium | Continuous innovation, user feedback |
+| Funding constraints | High | Phased rollout, cost optimization |
+| Stakeholder resistance | Medium | Pilot programs, success metrics, transparency |
+
+---
+
+## 14. Compliance & Standards
+
+### 14.1 Data Protection
+
+- **Indian IT Act 2000**: Compliance with data protection provisions
+- **Digital Personal Data Protection Act 2023**: User consent, data minimization
+- **ISO 27001**: Information security management
+
+### 14.2 Accessibility
+
+- **WCAG 2.1 Level AA**: Web accessibility standards
+- **Screen Reader Support**: ARIA labels, semantic HTML
+- **Keyboard Navigation**: Full keyboard accessibility
+- **Color Contrast**: Minimum 4.5:1 ratio
+
+### 14.3 API Standards
+
+- **REST**: RESTful API design principles
+- **OpenAPI 3.0**: API documentation standard
+- **JSON Schema**: Request/response validation
+- **OAuth 2.0**: Industry-standard authorization (future)
+
+---
+
+## 15. Conclusion
+
+The FixIt Hub platform represents a comprehensive, AI-powered solution for modernizing civic infrastructure management in India. By combining multilingual support, intelligent automation, predictive analytics, and transparent governance, the system addresses critical gaps in traditional complaint management systems.
+
+### Key Innovations
+
+1. **AI-Powered Intelligence**: Multilingual processing and automated classification reduce manual effort and enable inclusive participation across India's linguistic diversity.
+
+2. **Predictive Risk Scoring**: Statistical modeling identifies emerging infrastructure stress zones before they become critical, enabling proactive governance.
+
+3. **Controlled Transparency**: The reopen mechanism balances citizen accountability with spam prevention, ensuring genuine issues receive attention while maintaining system integrity.
+
+4. **Executive-Ready Insights**: AI-generated weekly reports transform raw data into actionable intelligence for decision-makers.
+
+5. **Cloud-Native Scalability**: AWS-based architecture ensures the platform can scale from pilot cities to nationwide deployment.
+
+### Implementation Readiness
+
+The design provides:
+
+- **Complete technical specifications** for immediate development
+- **Scalable architecture** supporting 10M+ users
+- **Security-first approach** with comprehensive protection measures
+- **Cost-effective deployment** with clear budget projections
+- **Future-proof extensibility** with well-defined enhancement roadmap
+
+### Expected Impact
+
+- **50% reduction** in average issue resolution time
+- **75%+ resolution rate** within 7 days
+- **100% transparency** with proof-based resolution tracking
+- **Inclusive participation** across 22+ Indian languages
+- **Data-driven governance** with predictive analytics
+
+This platform has the potential to transform civic engagement in India, creating a more responsive, transparent, and efficient infrastructure management ecosystem that serves all citizens regardless of language, location, or technical literacy.
+
+---
+
+## Appendix A: Glossary
+
+- **AI**: Artificial Intelligence
+- **API**: Application Programming Interface
+- **AWS**: Amazon Web Services
+- **CDN**: Content Delivery Network
+- **CORS**: Cross-Origin Resource Sharing
+- **CRUD**: Create, Read, Update, Delete
+- **EC2**: Elastic Compute Cloud
+- **JWT**: JSON Web Token
+- **ML**: Machine Learning
+- **ORM**: Object-Relational Mapping
+- **RBAC**: Role-Based Access Control
+- **RDS**: Relational Database Service
+- **REST**: Representational State Transfer
+- **S3**: Simple Storage Service
+- **SQL**: Structured Query Language
+- **SSL/TLS**: Secure Sockets Layer / Transport Layer Security
+- **UUID**: Universally Unique Identifier
+
+## Appendix B: API Quick Reference
+
+### Authentication
+
+- `POST /api/v1/auth/register` - Register new user
+- `POST /api/v1/auth/login` - Login and get tokens
+- `POST /api/v1/auth/refresh` - Refresh access token
+
+### Issues
+
+- `POST /api/v1/issues` - Create new issue
+- `GET /api/v1/issues` - List issues (with filters)
+- `GET /api/v1/issues/{id}` - Get issue details
+- `PATCH /api/v1/issues/{id}/resolve` - Resolve issue (officer)
+- `POST /api/v1/issues/{id}/reopen` - Reopen issue (citizen)
+
+### Analytics
+
+- `GET /api/v1/stats` - Get system statistics
+- `GET /api/v1/stats/risk-zones` - Get high-risk zones
+
+### Reports
+
+- `POST /api/v1/reports/generate` - Generate weekly report (admin)
+- `GET /api/v1/reports/latest` - Get latest report
+- `GET /api/v1/reports` - List all reports
+- `GET /api/v1/reports/{id}` - Get specific report
+
+---
+
+## Appendix C: Database ER Diagram
+
+```
+┌─────────────────┐
+│     users       │
+├─────────────────┤
+│ id (PK)         │
+│ email           │
+│ password_hash   │
+│ full_name       │
+│ role            │
+│ is_verified     │
+│ department      │
+│ ward_assigned   │
+└────────┬────────┘
+         │
+         │ 1:N
+         │
+┌────────▼────────────────────┐
+│        issues               │
+├─────────────────────────────┤
+│ id (PK)                     │
+│ title                       │
+│ description                 │
+│ category                    │
+│ status                      │
+│ latitude                    │
+│ longitude                   │
+│ ward                        │
+│ reported_by (FK → users)    │
+│ assigned_to (FK → users)    │
+│ reopen_count                │
+│ last_reopened_at            │
+└────────┬────────────────────┘
+         │
+         │ 1:N
+         │
+┌────────▼────────────────────┐
+│   resolution_history        │
+├─────────────────────────────┤
+│ id (PK)                     │
+│ issue_id (FK → issues)      │
+│ resolved_by (FK → users)    │
+│ resolved_at                 │
+│ proof_url                   │
+│ notes                       │
+│ reopened                    │
+│ reopen_reason               │
+└─────────────────────────────┘
+
+┌─────────────────────────────┐
+│     weekly_reports          │
+├─────────────────────────────┤
+│ id (PK)                     │
+│ week_start                  │
+│ week_end                    │
+│ total_issues                │
+│ resolved_issues             │
+│ executive_summary           │
+│ detailed_statistics (JSON)  │
+│ generated_by (FK → users)   │
+└─────────────────────────────┘
+```
+
+---
+
+## Appendix D: Sample AI Prompts
+
+### Translation Prompt
+
+```
+You are a professional translator specializing in Indian languages.
+
+Task: Translate the following civic complaint from {source_language} to English.
+
+Requirements:
+- Preserve technical terms (pothole, drainage, etc.)
+- Keep location names unchanged
+- Maintain the urgency and tone
+- Output only the translated text
+
+Original text:
+{description}
+
+Translated text:
+```
+
+### Classification Prompt
+
+```
+You are a civic infrastructure expert.
+
+Task: Classify the following issue into one category.
+
+Categories:
+- pothole: Road surface damage, holes in roads
+- garbage: Waste management, overflowing bins
+- water: Water supply issues, leakage, contamination
+- electrical: Streetlight problems, power issues
+- road: Road damage, cracks, surface issues
+- drainage: Sewage, blocked drains, flooding
+- other: Issues not fitting above categories
+
+Issue description:
+{description}
+
+Respond in JSON format:
+{
+  "category": "category_name",
+  "confidence": 0.0-1.0,
+  "reasoning": "brief explanation"
+}
+```
+
+### Executive Summary Prompt
+
+```
+You are a senior civic analyst preparing a weekly report for government officials.
+
+Task: Generate a concise executive summary (200-300 words) based on the following data.
+
+Focus on:
+1. Key trends and changes from previous week
+2. High-risk areas requiring immediate attention
+3. Performance metrics (resolution rate, response time)
+4. Actionable recommendations
+
+Data:
+{json_statistics}
+
+Generate a professional, action-oriented summary suitable for senior officials.
+```
+
+---
+
+## Document Information
+
+**Version**: 1.0
+**Last Updated**: February 15, 2026
+**Author**: Technical Architecture Team
+**Status**: Final Design Document
+**Target Audience**: Development Team, Stakeholders, Hackathon Judges
+
+**Document History**:
+
+- v1.0 (Feb 15, 2026): Initial comprehensive design document
+
+---
+
+**End of Design Document**
+
