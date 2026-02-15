@@ -106,14 +106,15 @@ FixIt Hub is developed by a multidisciplinary team focused on scalable backend s
 
 ## 📌 Project Status
 
-Planning & Documentation Phase Completed \n
-MVP implementation in progress.
+  Planning & Documentation Phase Completed 
+  MVP implementation in progress.
 
 ---
 
 ## 📄 License
 
 MIT License
+
 
 
 
