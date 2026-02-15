@@ -109,15 +109,11 @@ FixIt_Hub/
 
 FixIt Hub is developed by a multidisciplinary team focused on scalable backend systems, AI integration, and civic technology innovation.
 
-### Project Lead & Repository Owner : [**Rijul Singh**](https://github.com//Rijuls-code)
+### Members :
+Repo Owner : [**Rijul Singh**](https://github.com//Rijuls-code)
 Backend : [Shreyas Patil](https://github.com//Shreyas-patil07)
-
-| Name | Role | GitHub |
-|------|------|--------|
-| Rijul | Project Lead & Repository Owner | https://github.com/Rijuls-code |
-| Shreyas Patil | Backend & AI Architecture | https://github.com/Shreyas-patil07 |
-| Vedant Sawant | https://github.com/vedantsawant2803-cloud |
-| Nidhi Nikam | Documentation & Requirements | https://github.com/Nidhi194 |
+Member : [Vedant Sawant](https://github.com//vedantsawant2803-cloud)
+Member : [Nidhi Nikam](https://github.com//Nidhi194)
 
 ---
 
@@ -131,6 +127,7 @@ MVP implementation in progress.
 ## 📄 License
 
 MIT License
+
 
 
 
