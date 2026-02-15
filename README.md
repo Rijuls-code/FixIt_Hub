@@ -41,40 +41,40 @@ This enables proactive governance instead of reactive complaint handling.
 ## 🚀 MVP Features (Web-Only)
 
 ### 👤 User Roles
-- Citizen
-- Government Officer
-- Admin
+- Citizen  
+- Government Officer  
+- Admin  
 
 ### 📝 Issue Reporting
-- Title and description
-- Image upload
-- GPS-based location tagging
-- Multilingual submission support
-- AI translation and classification
+- Title and description  
+- Image upload  
+- GPS-based location tagging  
+- Multilingual submission support  
+- AI translation and classification  
 
 ### 🔄 Resolution Workflow
-- Officer marks issue as resolved with proof photo
-- Resolution notes required
-- Transparent resolution history
-- Citizen reopen logic (max 2 attempts + cooldown)
+- Officer marks issue as resolved with proof photo  
+- Resolution notes required  
+- Transparent resolution history  
+- Citizen reopen logic (max 2 attempts + cooldown)  
 
 ### 📊 Intelligence & Analytics
-- Ward-level risk score calculation
-- Weekly statistics aggregation
-- AI-generated executive summary (200–300 words)
+- Ward-level risk score calculation  
+- Weekly statistics aggregation  
+- AI-generated executive summary (200–300 words)  
 - Dashboard displaying:
-  - Total Issues
-  - Fixed Issues
-  - Pending Issues
+  - Total Issues  
+  - Fixed Issues  
+  - Pending Issues  
 
 ---
 
 ## 🧠 AI Capabilities
 
-- Language detection and translation
-- Automatic issue categorization with confidence score
-- Risk hotspot identification
-- Executive summary generation for decision-makers
+- Language detection and translation  
+- Automatic issue categorization with confidence score  
+- Risk hotspot identification  
+- Executive summary generation for decision-makers  
 
 AI integration is handled via Amazon Bedrock or external AI APIs.
 
@@ -94,3 +94,35 @@ The architecture is cloud-ready and designed for scalability.
 
 ## 📂 Repository Structure
 
+FixIt_Hub/
+│
+├── requirements.md → Functional & non-functional requirements
+├── design.md → Architecture and technical design
+├── README.md → Project overview
+└── (implementation folders to be added in development phase)
+
+---
+
+## 👥 Team
+
+FixIt Hub is developed by a multidisciplinary team focused on scalable backend systems, AI integration, and civic technology innovation.
+
+| Name | Role | GitHub |
+|------|------|--------|
+| Rijul | Project Lead & Repository Owner | https://github.com/Rijuls-code |
+| Shreyas Patil | Backend & AI Architecture | https://github.com/Shreyas-patil07 |
+| Vedant Sawant | https://github.com/vedantsawant2803-cloud |
+| Nidhi Nikam | Documentation & Requirements | https://github.com/Nidhi194 |
+
+---
+
+## 📌 Project Status
+
+Planning & Documentation Phase  
+MVP implementation in progress.
+
+---
+
+## 📄 License
+
+MIT License
