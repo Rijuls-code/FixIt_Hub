@@ -1,292 +1,116 @@
-# 🌍 Citizen Issue Reporter
-> An AI‑powered civic engagement platform that enables citizens to report public issues and helps government authorities respond efficiently with transparency and accountability.
+# 🌍 FixIt Hub  
+## AI-Powered Civic Intelligence Platform
 
----
-## 📌 Overview
+FixIt Hub is a web-based civic intelligence platform that enables citizens to report public infrastructure issues and helps government authorities respond with transparency, accountability, and data-driven prioritization.
 
-**Citizen Issue Reporter** is a modern, scalable platform designed to bridge the gap between citizens and government authorities. It allows users to report civic problems such as potholes, garbage, water leakage, streetlight failures, and more — while enabling authorities to track, manage, and resolve them efficiently.
-
-The platform leverages **Artificial Intelligence**, **real‑time data processing**, and **cross‑platform accessibility** (Web + Mobile) to provide a seamless and intelligent civic reporting experience.
-
----
-## ✨ Key Features
-
-### 👤 Citizen Features
-
-* 📸 Report issues with images, location, and description
-* 🧠 AI‑powered automatic issue categorization
-* 🌐 Multi‑language support for inclusivity
-* 🔍 Advanced filtering by location, category, and status
-* 👍 Upvote and track reported issues
-* 🔔 Real‑time notifications on issue updates
-* 📊 View issue status: Pending, In Progress, Resolved
-
-### 🏛️ Government / Authority Features
-
-* 📋 Dashboard to manage and respond to issues
-* 📊 Analytics and reporting tools
-* 🧠 AI‑assisted prioritization and classification
-* 📝 Post official resolutions and updates
-* 👥 Manage users and departments
-
-### 🤖 AI Features
-
-* Automatic issue classification using ML models
-* Natural language processing for issue descriptions
-* Smart tagging and categorization
-* Analytics insights and trend detection
+The system transforms scattered civic complaints into structured analytics and predictive risk indicators using AI.
 
 ---
 
-## 🏗️ Architecture Overview
+## 🎯 Problem
 
-This project follows a **monorepo architecture** with modular services.
+Civic issue reporting in India is:
 
-```
-citizen-issue-reporter/
-│
-├── packages/
-│   ├── api/        → Backend REST API (Node.js, Express)
-│   ├── web/        → Web application (React, Vite)
-│   ├── mobile/     → Mobile app (React Native, Expo)
-│   └── ai/         → AI microservice (Python, FastAPI)
-│
-├── docker-compose.yml
-├── package.json
-└── README.md
-```
+- Fragmented across platforms  
+- Reactive instead of proactive  
+- Limited by language barriers  
+- Lacking structured analytics  
+- Weak in accountability tracking  
+
+Municipalities often respond only after issues escalate, without early warning systems or risk-based prioritization.
 
 ---
 
-## 🧰 Technology Stack
+## 💡 Solution
 
-### Frontend
+FixIt Hub centralizes civic issue reporting and enhances it with AI-driven intelligence.
 
-* React.js
-* Vite
-* TypeScript
-* Redux Toolkit
-* React Native (Expo)
+The platform:
 
-### Backend
+- Accepts multilingual issue submissions  
+- Automatically translates and classifies issues  
+- Tracks resolution with proof-based verification  
+- Allows controlled citizen reopen (max 2 times, 36-hour cooldown)  
+- Calculates ward-level predictive risk scores  
+- Generates AI-powered weekly executive summaries  
 
-* Node.js
-* Express.js
-* TypeScript
-* REST API Architecture
-
-### AI Service
-
-* Python
-* FastAPI
-* TensorFlow / PyTorch
-* NLP Models
-
-### Databases
-
-* PostgreSQL → Primary relational database
-* MongoDB → Analytics and logs
-* Redis → Caching and session storage
-
-### Infrastructure
-
-* Docker & Docker Compose
-* Cloud Storage (AWS S3 / Google Cloud Storage)
+This enables proactive governance instead of reactive complaint handling.
 
 ---
 
-## ⚙️ Prerequisites
+## 🚀 MVP Features (Web-Only)
 
-Ensure you have installed:
+### 👤 User Roles
+- Citizen  
+- Government Officer  
+- Admin  
 
-* Node.js ≥ 18
-* npm ≥ 9
-* Python ≥ 3.11
-* Poetry (Python dependency manager)
-* Docker & Docker Compose
-* Git
+### 📝 Issue Reporting
+- Title and description  
+- Image upload  
+- GPS-based location tagging  
+- Multilingual submission support  
+- AI translation and classification  
 
----
+### 🔄 Resolution Workflow
+- Officer marks issue as resolved with proof photo  
+- Resolution notes required  
+- Transparent resolution history  
+- Citizen reopen logic (max 2 attempts + cooldown)  
 
-## 🚀 Getting Started
-
-### 1️⃣ Clone the Repository
-
-```bash
-git clone <repository-url>
-cd citizen-issue-reporter
-```
-
----
-
-### 2️⃣ Install Dependencies
-
-Install Node dependencies:
-
-```bash
-npm install
-```
-
-Install AI service dependencies:
-
-```bash
-cd packages/ai
-poetry install
-cd ../..
-```
+### 📊 Intelligence & Analytics
+- Ward-level risk score calculation  
+- Weekly statistics aggregation  
+- AI-generated executive summary (200–300 words)  
+- Dashboard displaying:
+  - Total Issues  
+  - Fixed Issues  
+  - Pending Issues  
 
 ---
 
-### 3️⃣ Configure Environment Variables
+## 🧠 AI Capabilities
 
-```bash
-cp .env.example .env
-```
+- Language detection and translation  
+- Automatic issue categorization with confidence score  
+- Risk hotspot identification  
+- Executive summary generation for decision-makers  
 
-Update `.env` file with your configuration values.
-
----
-
-### 4️⃣ Start Databases using Docker
-```bash
-docker-compose up -d
-```
-
-Check running services:
-
-```bash
-docker-compose ps
-```
-
-Services started:
-
-* PostgreSQL
-* MongoDB
-* Redis
+AI integration is handled via Amazon Bedrock or external AI APIs.
 
 ---
 
-### 5️⃣ Run Database Migrations
+## 🏗️ Technology Stack (MVP)
 
-```bash
-cd packages/api
-npm run migrate:up
-cd ../..
-```
+- **Frontend:** React + Vite  
+- **Backend:** FastAPI (Python)  
+- **Database:** PostgreSQL  
+- **Storage:** AWS S3  
+- **AI Integration:** Amazon Bedrock / External AI API  
 
----
-
-### 6️⃣ Start Development Servers
-
-Run all services:
-
-```bash
-npm run dev
-```
-
-Or run individually:
-
-```bash
-npm run dev:api
-npm run dev:web
-npm run dev:mobile
-npm run dev:ai
-```
+The architecture is cloud-ready and designed for scalability.
 
 ---
 
-## 🌐 Service URLs
+## 👥 Team
 
-| Service      | URL                                                          |
-| ------------ | ------------------------------------------------------------ |
-| API          | [http://localhost:3000](http://localhost:3000)               |
-| Web App      | [http://localhost:3001](http://localhost:3001)               |
-| AI Service   | [http://localhost:8000](http://localhost:8000)               |
-| Health Check | [http://localhost:3000/health](http://localhost:3000/health) |
+FixIt Hub is developed by a multidisciplinary team focused on scalable backend systems, AI integration, and civic technology innovation.
 
----
-
-## 📊 Database Schema
-
-Core entities include:
-
-* Users
-* Issues
-* Resolutions
-* Votes
-* Notifications
-* Analytics logs
-
-Supports relationships, indexing, and optimized queries.
+### Members :
+- Repo Owner : [**Rijul Singh**](https://github.com//Rijuls-code)
+- Backend : [Shreyas Patil](https://github.com//Shreyas-patil07)
+- Member : [Vedant Sawant](https://github.com//vedantsawant2803-cloud)
+- Member : [Nidhi Nikam](https://github.com//Nidhi194)
 
 ---
 
-## 🧪 Available Scripts
+## 📌 Project Status
 
-### Root Scripts
-
-```bash
-npm run dev
-npm run build
-npm run test
-npm run lint
-npm run format
-```
-
-### Workspace Scripts
-
-```bash
-npm run <script> --workspace=@citizen-issue-reporter/api
-```
+Planning & Documentation Phase  
+MVP implementation in progress.
 
 ---
 
-## 🔧 Development Tools
-
-This project uses professional development tooling:
-
-* ESLint → Code linting
-* Prettier → Code formatting
-* Husky → Git hooks
-* lint-staged → Pre‑commit validation
-
-Ensures clean, consistent, and production‑ready code.
-
----
-## 📈 Future Improvements (Roadmap)
-
-* Real‑time tracking using WebSockets
-* AI image‑based issue detection
-* Admin analytics dashboard
-* Location heatmaps
-* Government department routing
-* Push notifications
-* Cloud deployment
-
----
-## 🤝 Contributing
-
-Contributions are welcome!
-Steps:
-1. Fork the repository
-2. Create a new branch
-3. Make your changes
-4. Commit and push
-5. Open a Pull Request
-
----
 ## 📄 License
 
-Specify your license here.
 MIT License
-
----
-## 💡 Project Vision
-To create a smarter, faster, and transparent civic issue reporting ecosystem powered by AI — improving communication between citizens and authorities and building better cities.
-
----
-## 👨‍💻 Author
-Developed with dedication to improve civic engagement using modern technology.
-
-
-⭐ If you like this project, consider giving it a star!
