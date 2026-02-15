@@ -2013,7 +2013,7 @@ GROUP BY ward;
 - **ORM**: SQLAlchemy 2.0
 - **Validation**: Pydantic v2
 - **Authentication**: python-jose (JWT)
-- **Password Hashing**: bcrypt
+- **Password Hashing**: argon2
 - **Async HTTP**: httpx
 - **Image Processing**: Pillow
 - **Task Queue**: Celery (optional)
@@ -2426,4 +2426,5 @@ Generate a professional, action-oriented summary suitable for senior officials.
 ---
 
 **End of Design Document**
+
 
