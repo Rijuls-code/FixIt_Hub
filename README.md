@@ -92,18 +92,6 @@ The architecture is cloud-ready and designed for scalability.
 
 ---
 
-## 📂 Repository Structure
-
-```
-FixIt_Hub/
-│
-├── requirements.md → Functional & non-functional requirements
-├── design.md → Architecture and technical design
-├── README.md → Project overview
-└── (implementation folders to be added in development phase)
-
-```
-
 ## 👥 Team
 
 FixIt Hub is developed by a multidisciplinary team focused on scalable backend systems, AI integration, and civic technology innovation.
@@ -126,6 +114,7 @@ MVP implementation in progress.
 ## 📄 License
 
 MIT License
+
 
 
 
