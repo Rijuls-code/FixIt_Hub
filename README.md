@@ -109,7 +109,7 @@ FixIt_Hub/
 
 FixIt Hub is developed by a multidisciplinary team focused on scalable backend systems, AI integration, and civic technology innovation.
 
-### Project Lead & Repository Owner **Rijul Singh**}(https://github.com//Rijuls-code)
+### Project Lead & Repository Owner : [**Rijul Singh**](https://github.com//Rijuls-code)
 
 | Name | Role | GitHub |
 |------|------|--------|
@@ -130,6 +130,7 @@ MVP implementation in progress.
 ## 📄 License
 
 MIT License
+
 
 
 
